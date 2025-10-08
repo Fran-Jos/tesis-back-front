@@ -1,12 +1,46 @@
-import type { ReactNode } from "react";
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import clsx from "clsx";
 import navigationItems from "../../data/navigation";
 import Topbar from "./Topbar";
+import useAuth from "../../hooks/useAuth";
+import { entityConfigMap } from "../../config/entities";
 
-const AppShell = ({ children }: { children: ReactNode }) => {
+const AppShell = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const location = useLocation();
+
+  const { title, subtitle } = useMemo(() => {
+    const segments = location.pathname.split("/").filter(Boolean);
+    if (segments.length === 0) {
+      return { title: "Panel de control", subtitle: "Resumen general" };
+    }
+
+    if (segments[0] !== "app") {
+      return { title: "Panel de control", subtitle: "" };
+    }
+
+    if (segments[1] === "dashboard") {
+      return { title: "Panel principal", subtitle: "Indicadores de mantenimiento" };
+    }
+
+    const entityKey = segments[1];
+    const entityConfig = entityConfigMap[entityKey];
+    if (!entityConfig) {
+      return { title: "Panel de control", subtitle: "" };
+    }
+
+    if (segments[2] === "nuevo") {
+      return { title: `Nuevo ${entityConfig.label.toLowerCase()}`, subtitle: entityConfig.description };
+    }
+
+    if (segments[2] && segments[3] === "editar") {
+      return { title: `Editar ${entityConfig.label.toLowerCase()}`, subtitle: entityConfig.description };
+    }
+
+    return { title: entityConfig.label, subtitle: entityConfig.description };
+  }, [location.pathname]);
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-700">
@@ -18,7 +52,7 @@ const AppShell = ({ children }: { children: ReactNode }) => {
       >
         <div className="mb-8 flex items-center justify-between">
           <span className="text-lg font-semibold tracking-tight text-slate-900">
-            Nova Insights
+            Flota Inteligente
           </span>
           <button
             type="button"
@@ -67,36 +101,28 @@ const AppShell = ({ children }: { children: ReactNode }) => {
                       )}
                     />
                     <span>{item.name}</span>
-                    {item.badge ? (
-                      <span className="ml-auto rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-semibold text-indigo-600">
-                        {item.badge}
-                      </span>
-                    ) : null}
                   </>
                 )}
               </NavLink>
             ))}
           </div>
-          <div className="space-y-2">
-            <p className="px-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
-              Productivity
-            </p>
-            {navigationItems.secondary.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100/70 hover:text-slate-700"
-              >
-                <item.icon className="size-5 text-slate-400 group-hover:text-slate-600" />
-                <span>{item.name}</span>
-                {item.badge ? (
-                  <span className="ml-auto rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-semibold text-indigo-600">
-                    {item.badge}
-                  </span>
-                ) : null}
-              </a>
-            ))}
-          </div>
+          {navigationItems.secondary.length ? (
+            <div className="space-y-2">
+              <p className="px-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
+                Recursos
+              </p>
+              {navigationItems.secondary.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100/70 hover:text-slate-700"
+                >
+                  <item.icon className="size-5 text-slate-400 group-hover:text-slate-600" />
+                  <span>{item.name}</span>
+                </a>
+              ))}
+            </div>
+          ) : null}
 
           <div className="mt-auto rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-indigo-50/60 to-white p-4 shadow-lg">
             <p className="text-sm font-semibold text-slate-900">Seamless Collaboration</p>
@@ -111,9 +137,18 @@ const AppShell = ({ children }: { children: ReactNode }) => {
       </aside>
 
       <div className="flex flex-1 flex-col lg:pl-72">
-        <Topbar onOpenSidebar={() => setSidebarOpen(true)} />
-        <main className="flex-1 px-4 pb-10 pt-24 sm:px-6 lg:px-10">
-          <div className="mx-auto w-full max-w-7xl space-y-10">{children}</div>
+        <Topbar
+          onOpenSidebar={() => setSidebarOpen(true)}
+          title={title}
+          subtitle={subtitle}
+          userName={user?.nombreCompleto}
+          userRole={user?.rol}
+          onLogout={logout}
+        />
+        <main className="flex-1 px-4 pb-10 pt-28 sm:px-6 lg:px-10">
+          <div className="mx-auto w-full max-w-7xl space-y-10">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
