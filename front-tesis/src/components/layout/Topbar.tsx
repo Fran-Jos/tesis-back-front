@@ -4,21 +4,26 @@ import notifications from "../../data/notifications";
 
 type TopbarProps = {
   onOpenSidebar: () => void;
+  title: string;
+  subtitle?: string;
+  userName?: string;
+  userRole?: string;
+  onLogout: () => void;
 };
 
-const Topbar = ({ onOpenSidebar }: TopbarProps) => {
+const Topbar = ({ onOpenSidebar, title, subtitle, userName, userRole, onLogout }: TopbarProps) => {
   const [open, setOpen] = useState(false);
 
   return (
     <header className="fixed inset-x-0 top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-10">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-10">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onOpenSidebar}
             className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm transition hover:border-indigo-200 hover:text-indigo-500 lg:hidden"
           >
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">Abrir menú</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -30,37 +35,21 @@ const Topbar = ({ onOpenSidebar }: TopbarProps) => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 5.25h16.5m-16.5 6h16.5m-16.5 6h16.5" />
             </svg>
           </button>
-          <div className="hidden flex-col lg:flex">
-            <p className="text-xs font-semibold uppercase tracking-wider text-indigo-500">Analytics Platform</p>
-            <h1 className="text-lg font-semibold text-slate-900">Customer Intelligence Overview</h1>
+          <div className="flex flex-col">
+            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-500">
+              {subtitle ?? "Gestión de mantenimiento"}
+            </p>
+            <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden items-center gap-3 rounded-full border border-slate-200 bg-white px-3 py-1.5 shadow-sm sm:flex">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-5 text-slate-400"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
-            <input
-              type="search"
-              placeholder="Search dashboards"
-              className="w-52 border-none bg-transparent text-sm text-slate-600 placeholder:text-slate-400 focus:outline-none"
-            />
-          </div>
-
           <button
             type="button"
-            className="relative flex size-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-indigo-200 hover:text-indigo-500"
+            className="relative hidden size-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-indigo-200 hover:text-indigo-500 sm:flex"
             onClick={() => setOpen((value) => !value)}
           >
-            <span className="sr-only">Open notifications</span>
+            <span className="sr-only">Ver notificaciones</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -78,24 +67,21 @@ const Topbar = ({ onOpenSidebar }: TopbarProps) => {
 
           <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-2 py-1.5 shadow-sm">
             <img
-              alt="Alicia Navarro"
+              alt={userName ?? "Usuario"}
               src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=facearea&facepad=2&w=80&h=80&q=80"
               className="size-10 rounded-xl object-cover"
             />
             <div className="hidden text-left sm:block">
-              <p className="text-sm font-semibold text-slate-900">Alicia Navarro</p>
-              <p className="text-xs text-slate-400">Operations Lead</p>
+              <p className="text-sm font-semibold text-slate-900">{userName ?? "Usuario"}</p>
+              <p className="text-xs text-slate-400">{userRole ?? "Invitado"}</p>
             </div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-5 text-slate-400"
+            <button
+              type="button"
+              onClick={onLogout}
+              className="rounded-xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-500 transition hover:border-red-200 hover:text-red-500"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-            </svg>
+              Salir
+            </button>
           </div>
         </div>
       </div>

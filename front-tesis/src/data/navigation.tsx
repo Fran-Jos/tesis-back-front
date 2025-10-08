@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { entityConfigs } from "../config/entities";
 
 type IconComponent = ComponentType<{ className?: string }>;
 
@@ -6,14 +7,12 @@ type NavigationLink = {
   name: string;
   to: string;
   icon: IconComponent;
-  badge?: string;
 };
 
 type NavigationItem = {
   name: string;
   href: string;
   icon: IconComponent;
-  badge?: string;
 };
 
 const DashboardIcon: IconComponent = ({ className = "" }) => (
@@ -30,100 +29,74 @@ const DashboardIcon: IconComponent = ({ className = "" }) => (
   </svg>
 );
 
-const ProjectsIcon: IconComponent = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5-4.5m0 0l-1.125-.375a2.25 2.25 0 00-2.25.562L4.91 11.031A3 3 0 004.5 12.9v3.1a3 3 0 003 3h3.1a3 3 0 001.869-.41l5.594-5.964a2.25 2.25 0 00.562-2.25L17.75 9.75m-3.5-4.5l1.669 1.669" />
+const FleetIcon: IconComponent = ({ className = "" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15a2.25 2.25 0 012.25-2.25h15a2.25 2.25 0 012.25 2.25v1.5A2.25 2.25 0 0119.5 18.75h-15A2.25 2.25 0 012.25 16.5V15z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.5L5.25 6.75A2.25 2.25 0 017.39 5.25h9.22A2.25 2.25 0 0118.75 6.75L21 13.5M5.25 18.75h.008v.008H5.25v-.008zM18.75 18.75h.008v.008h-.008v-.008z" />
   </svg>
 );
 
-const CalendarIcon: IconComponent = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 3.75v2.25m9-2.25v2.25M4.5 8.25h15M5.25 5.25h13.5a1.5 1.5 0 011.5 1.5v12a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-12a1.5 1.5 0 011.5-1.5z" />
+const UsersIcon: IconComponent = ({ className = "" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4.501 20.118a7.5 7.5 0 0114.998 0" />
   </svg>
 );
 
-const TeamIcon: IconComponent = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 6.75a3 3 0 116 0 3 3 0 01-6 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 19.5a7.5 7.5 0 0114.25-3.5m2.25 3.5v-3.75m0 0h-3.75m3.75 0l-2.25 2.25" />
+const ClipboardIcon: IconComponent = ({ className = "" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 3.75H7.5A2.25 2.25 0 005.25 6v12A2.25 2.25 0 007.5 20.25h9A2.25 2.25 0 0018.75 18V6A2.25 2.25 0 0016.5 3.75H15" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 3.75h6v.75A1.5 1.5 0 0113.5 6h-3A1.5 1.5 0 019 4.5v-.75z" />
   </svg>
 );
 
-const AutomationIcon: IconComponent = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9V3m0 0a9 9 0 019 9h-6m-3 3v6m0 0a9 9 0 01-9-9h6" />
+const AlertIcon: IconComponent = ({ className = "" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12c0 3.5 2.113 6.5 5.25 7.712l.75.288A8.999 8.999 0 0012 21a8.999 8.999 0 003.75-.75l.75-.288A8.251 8.251 0 0021.75 12a8.251 8.251 0 00-5.25-7.712l-.75-.288a9.002 9.002 0 00-6 0l-.75.288A8.251 8.251 0 002.25 12z" />
   </svg>
 );
 
-const ReportsIcon: IconComponent = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 4.5h6m-6 3h6M9 10.5h6m-3 3v6m-9 0h18" />
+const GearIcon: IconComponent = ({ className = "" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.094c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93l.892.363c.511.208.767.78.558 1.29l-.375.918a1.125 1.125 0 000 .854l.375.918c.209.51-.047 1.082-.558 1.29l-.892.363a1.125 1.125 0 00-.78.93l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.02-.398-1.11-.94l-.149-.894a1.125 1.125 0 00-.78-.93l-.892-.363c-.511-.208-.767-.78-.558-1.29l.375-.918a1.125 1.125 0 000-.854l-.375-.918c-.209-.51.047-1.082.558-1.29l.892-.363c.396-.166.71-.506.78-.93l.149-.894z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
 
-const SupportIcon: IconComponent = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519a3 3 0 014.242 0L21 14.4m-3 3 1.5 1.5M3 18.75V6.375c0-1.242 1.008-2.25 2.25-2.25h13.5c1.242 0 2.25 1.008 2.25 2.25V18.75M3 18.75h18M3 18.75l2.25-2.25m0 0h13.5l2.25 2.25" />
+const BookIcon: IconComponent = ({ className = "" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 6.75V18A2.25 2.25 0 006.75 20.25H18" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 3.75H8.25A1.5 1.5 0 006.75 5.25v13.5M12 6.75h4.5" />
   </svg>
 );
+
+const entityIconMap: Record<string, IconComponent> = {
+  vehiculos: FleetIcon,
+  usuarios: UsersIcon,
+  planes: GearIcon,
+  ordenes: ClipboardIcon,
+  tareas: BookIcon,
+  "repuestos-usados": GearIcon,
+  registrokm: DashboardIcon,
+  alertas: AlertIcon,
+};
+
+const mainNavigation: NavigationLink[] = [
+  { name: "Dashboard", to: "/app/dashboard", icon: DashboardIcon },
+  ...entityConfigs.map((entity) => ({
+    name: entity.label,
+    to: `/app/${entity.key}`,
+    icon: entityIconMap[entity.key] ?? DashboardIcon,
+  })),
+];
 
 const navigationItems: {
   main: NavigationLink[];
   secondary: NavigationItem[];
 } = {
-  main: [
-    { name: "Dashboard", to: "/", icon: DashboardIcon },
-    { name: "Projects", to: "/projects", icon: ProjectsIcon, badge: "6" },
-    { name: "Calendar", to: "/calendar", icon: CalendarIcon },
-    { name: "Team", to: "/team", icon: TeamIcon },
-  ],
-  secondary: [
-    { name: "Automations", href: "#", icon: AutomationIcon },
-    { name: "Reports", href: "#", icon: ReportsIcon },
-    { name: "Support", href: "#", icon: SupportIcon, badge: "New" },
-  ],
+  main: mainNavigation,
+  secondary: [],
 };
 
 export default navigationItems;
