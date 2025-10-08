@@ -20,17 +20,55 @@ public class DataInitializer {
     @Bean
     CommandLineRunner initAdminUser() {
         return args -> {
-            if (usuarioRepository.count() == 0) {
-                Usuario admin = Usuario.builder()
-                        .nombre("Administrador")
-                        .apellido("Principal")
-                        .email("admin@tesis.com")
-                        .password(passwordEncoder.encode("Admin1234"))
-                        .estado(EstadoUsuario.ACTIVO)
-                        .rol(Rol.ADMIN)
-                        .build();
-                usuarioRepository.save(admin);
-            }
+            crearUsuarioSiNoExiste(
+                    "admin@tesis.com",
+                    "Administrador",
+                    "Principal",
+                    "0991001000",
+                    Rol.ADMIN,
+                    "Admin1234"
+            );
+
+            crearUsuarioSiNoExiste(
+                    "operador@tesis.com",
+                    "Olivia",
+                    "Campos",
+                    "0992002000",
+                    Rol.OPERADOR,
+                    "Operador123"
+            );
+
+            crearUsuarioSiNoExiste(
+                    "tecnico@tesis.com",
+                    "Mateo",
+                    "Reyes",
+                    "0993003000",
+                    Rol.TECNICO,
+                    "Tecnico123"
+            );
         };
+    }
+
+    private void crearUsuarioSiNoExiste(String email,
+                                        String nombre,
+                                        String apellido,
+                                        String celular,
+                                        Rol rol,
+                                        String passwordPlano) {
+        if (usuarioRepository.existsByEmail(email)) {
+            return;
+        }
+
+        Usuario usuario = Usuario.builder()
+                .nombre(nombre)
+                .apellido(apellido)
+                .numeroCelular(celular)
+                .email(email)
+                .password(passwordEncoder.encode(passwordPlano))
+                .estado(EstadoUsuario.ACTIVO)
+                .rol(rol)
+                .build();
+
+        usuarioRepository.save(usuario);
     }
 }

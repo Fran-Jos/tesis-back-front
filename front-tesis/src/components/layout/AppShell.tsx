@@ -144,6 +144,7 @@ const AppShell = () => {
           userName={user?.nombreCompleto}
           userRole={user?.rol}
           onLogout={logout}
+          isSidebarOpen={sidebarOpen}
         />
         <main className="flex-1 px-4 pb-10 pt-28 sm:px-6 lg:px-10">
           <div className="mx-auto w-full max-w-7xl space-y-10">
