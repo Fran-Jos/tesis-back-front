@@ -1,0 +1,39 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-outfit: "Outfit", sans-serif;
+  --color-ink: #0f172a;
+  --shadow-card: 0 20px 50px -20px rgb(15 23 42 / 0.2);
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  body {
+    @apply bg-slate-50 font-outfit text-base text-slate-700 antialiased;
+  }
+}
+
+@layer components {
+  .fc-toolbar-title {
+    @apply text-lg font-semibold text-slate-900;
+  }
+
+  .fc-button {
+    @apply rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-indigo-200 hover:text-indigo-600;
+  }
+
+  .fc-button-primary {
+    @apply bg-white text-slate-600;
+  }
+
+  .fc-daygrid-event {
+    @apply rounded-xl border border-indigo-200 bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-600 shadow-sm;
+  }
+
+  .fc-timegrid-event {
+    @apply rounded-2xl border border-indigo-200 bg-indigo-50/70 px-3 py-2 text-xs font-semibold text-indigo-600 shadow-sm;
+  }
+}

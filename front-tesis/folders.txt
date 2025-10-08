@@ -1,0 +1,604 @@
+Folder PATH listing for volume Windows
+Volume serial number is 1255-DDFA
+C:.
+|   +---.bin
+|   |   \---deps
+|   +---@babel
+|   |   +---code-frame
+|   |   |   \---lib
+|   |   +---compat-data
+|   |   |   \---data
+|   |   +---core
+|   |   |   +---lib
+|   |   |   |   +---config
+|   |   |   |   |   +---files
+|   |   |   |   |   +---helpers
+|   |   |   |   |   \---validation
+|   |   |   |   +---errors
+|   |   |   |   +---gensync-utils
+|   |   |   |   +---parser
+|   |   |   |   |   \---util
+|   |   |   |   +---tools
+|   |   |   |   +---transformation
+|   |   |   |   |   +---file
+|   |   |   |   |   \---util
+|   |   |   |   \---vendor
+|   |   |   \---src
+|   |   |       \---config
+|   |   |           \---files
+|   |   +---generator
+|   |   |   \---lib
+|   |   |       +---generators
+|   |   |       \---node
+|   |   +---helper-compilation-targets
+|   |   |   \---lib
+|   |   +---helper-globals
+|   |   |   \---data
+|   |   +---helper-module-imports
+|   |   |   \---lib
+|   |   +---helper-module-transforms
+|   |   |   \---lib
+|   |   +---helper-plugin-utils
+|   |   |   \---lib
+|   |   +---helper-string-parser
+|   |   |   \---lib
+|   |   +---helper-validator-identifier
+|   |   |   \---lib
+|   |   +---helper-validator-option
+|   |   |   \---lib
+|   |   +---helpers
+|   |   |   \---lib
+|   |   |       \---helpers
+|   |   +---parser
+|   |   |   +---bin
+|   |   |   +---lib
+|   |   |   \---typings
+|   |   +---plugin-transform-react-jsx-self
+|   |   |   \---lib
+|   |   +---plugin-transform-react-jsx-source
+|   |   |   \---lib
+|   |   +---template
+|   |   |   \---lib
+|   |   +---traverse
+|   |   |   \---lib
+|   |   |       +---path
+|   |   |       |   +---inference
+|   |   |       |   \---lib
+|   |   |       \---scope
+|   |   |           \---lib
+|   |   \---types
+|   |       \---lib
+|   |           +---asserts
+|   |           |   \---generated
+|   |           +---ast-types
+|   |           |   \---generated
+|   |           |   +---flow
+|   |           |   +---generated
+|   |           |   +---react
+|   |           |   \---typescript
+|   |           +---clone
+|   |           +---comments
+|   |           +---constants
+|   |           |   \---generated
+|   |           +---converters
+|   |           +---definitions
+|   |           +---modifications
+|   |           |   +---flow
+|   |           |   \---typescript
+|   |           +---retrievers
+|   |           +---traverse
+|   |           +---utils
+|   |           |   \---react
+|   |           \---validators
+|   |               +---generated
+|   |               \---react
+|   |   \---win32-x64
+|   +---@eslint
+|   |   +---config-array
+|   |   |       +---cjs
+|   |   |       |   \---std__path
+|   |   |       \---esm
+|   |   |           \---std__path
+|   |   +---config-helpers
+|   |   |       +---cjs
+|   |   |       \---esm
+|   |   +---core
+|   |   |       +---cjs
+|   |   |       \---esm
+|   |   +---eslintrc
+|   |   |   +---conf
+|   |   |   +---lib
+|   |   |   |   +---config-array
+|   |   |   |   +---shared
+|   |   |   |   \---types
+|   |   |       \---globals
+|   |   +---js
+|   |   |   +---src
+|   |   |   |   \---configs
+|   |   |   \---types
+|   |   +---object-schema
+|   |   |       +---cjs
+|   |   |       \---esm
+|   |   \---plugin-kit
+|   |           +---cjs
+|   |           \---esm
+|   +---@eslint-community
+|   |   +---eslint-utils
+|   |   |       \---eslint-visitor-keys
+|   |   |           \---lib
+|   |   \---regexpp
+|   +---@fullcalendar
+|   +---@humanfs
+|   |   +---core
+|   |   |   \---src
+|   |   \---node
+|   |       \---src
+|   +---@humanwhocodes
+|   |   +---module-importer
+|   |   |   \---src
+|   |   \---retry
+|   +---@isaacs
+|   |   \---fs-minipass
+|   |           +---commonjs
+|   |           \---esm
+|   +---@jridgewell
+|   |   +---gen-mapping
+|   |   |   |   \---types
+|   |   |   +---src
+|   |   |   \---types
+|   |   +---remapping
+|   |   |   +---src
+|   |   |   \---types
+|   |   +---resolve-uri
+|   |   |       \---types
+|   |   +---sourcemap-codec
+|   |   |   +---src
+|   |   |   \---types
+|   |   \---trace-mapping
+|   |       +---src
+|   |       \---types
+|   +---@react-jvectormap
+|   +---@rolldown
+|   |   \---pluginutils
+|   +---@rollup
+|   |   +---rollup-win32-x64-gnu
+|   |   \---rollup-win32-x64-msvc
+|   +---@svgdotjs
+|   |   +---svg.draggable.js
+|   |   |   \---src
+|   |   +---svg.filter.js
+|   |   |   \---src
+|   |   +---svg.js
+|   |   |   +---.config
+|   |   |   \---src
+|   |   |       +---animation
+|   |   |       +---elements
+|   |   |       +---modules
+|   |   |       |   +---core
+|   |   |       |   \---optional
+|   |   |       +---polyfills
+|   |   |       +---types
+|   |   |       \---utils
+|   |   +---svg.resize.js
+|   |   |   \---src
+|   |   \---svg.select.js
+|   |       \---src
+|   +---@tailwindcss
+|   |   +---node
+|   |   +---oxide
+|   |   |   \---scripts
+|   |   +---oxide-win32-x64-msvc
+|   |   \---vite
+|   +---@types
+|   |   +---babel__core
+|   |   +---babel__generator
+|   |   +---babel__template
+|   |   +---babel__traverse
+|   |   +---estree
+|   |   +---json-schema
+|   |   +---react
+|   |   |   \---ts5.0
+|   |   \---react-dom
+|   |       \---test-utils
+|   +---@vitejs
+|   |   \---plugin-react
+|   +---@yr
+|   |   \---monotone-cubic-spline
+|   |       \---src
+|   +---acorn
+|   |   +---bin
+|   +---acorn-jsx
+|   +---ajv
+|   |   +---lib
+|   |   |   +---compile
+|   |   |   +---dot
+|   |   |   +---dotjs
+|   |   |   \---refs
+|   |   \---scripts
+|   +---ansi-styles
+|   +---apexcharts
+|   |   |   \---locales
+|   |   +---src
+|   |   |   +---assets
+|   |   |   +---charts
+|   |   |   |   \---common
+|   |   |   |       +---bar
+|   |   |   |       +---circle
+|   |   |   |       +---line
+|   |   |   |       \---treemap
+|   |   |   +---libs
+|   |   |   +---locales
+|   |   |   +---modules
+|   |   |   |   +---annotations
+|   |   |   |   +---axes
+|   |   |   |   +---dimensions
+|   |   |   |   +---helpers
+|   |   |   |   +---legend
+|   |   |   |   +---settings
+|   |   |   |   \---tooltip
+|   |   |   +---svgjs
+|   |   |   \---utils
+|   |   \---types
+|   +---argparse
+|   |   \---lib
+|   +---attr-accept
+|   |       \---es
+|   +---autoprefixer
+|   |   +---bin
+|   |   +---data
+|   |   \---lib
+|   |       \---hacks
+|   +---balanced-match
+|   +---baseline-browser-mapping
+|   +---brace-expansion
+|   +---browserslist
+|   +---callsites
+|   +---caniuse-lite
+|   |   +---data
+|   |   |   +---features
+|   |   |   \---regions
+|   |       +---lib
+|   |       \---unpacker
+|   +---chalk
+|   |   \---source
+|   +---chownr
+|   |       +---commonjs
+|   |       \---esm
+|   +---clsx
+|   +---color-convert
+|   +---color-name
+|   +---concat-map
+|   |   +---example
+|   |   \---test
+|   +---convert-source-map
+|   +---cookie
+|   +---cross-spawn
+|   |   \---lib
+|   |       \---util
+|   +---csstype
+|   +---debug
+|   |   \---src
+|   +---deep-is
+|   |   +---example
+|   |   \---test
+|   +---detect-libc
+|   |   \---lib
+|   +---electron-to-chromium
+|   +---enhanced-resolve
+|   |   \---lib
+|   |       \---util
+|   |   +---bin
+|   |   \---lib
+|   +---escalade
+|   |   \---sync
+|   +---escape-string-regexp
+|   +---eslint
+|   |   +---bin
+|   |   +---conf
+|   |   +---lib
+|   |   |   +---cli-engine
+|   |   |   |   \---formatters
+|   |   |   +---config
+|   |   |   +---eslint
+|   |   |   +---languages
+|   |   |   |   \---js
+|   |   |   |       \---source-code
+|   |   |   |           \---token-store
+|   |   |   +---linter
+|   |   |   |   \---code-path-analysis
+|   |   |   +---rule-tester
+|   |   |   +---rules
+|   |   |   |   \---utils
+|   |   |   |       \---unicode
+|   |   |   +---services
+|   |   |   +---shared
+|   |   |   \---types
+|   |   \---messages
+|   +---eslint-plugin-react-hooks
+|   |   \---cjs
+|   +---eslint-plugin-react-refresh
+|   +---eslint-scope
+|   |   \---lib
+|   +---eslint-visitor-keys
+|   |   \---lib
+|   +---espree
+|   |   \---lib
+|   +---esquery
+|   +---esrecurse
+|   +---estraverse
+|   +---esutils
+|   |   \---lib
+|   +---fast-deep-equal
+|   |   \---es6
+|   +---fast-json-stable-stringify
+|   |   +---benchmark
+|   |   +---example
+|   |   \---test
+|   +---fast-levenshtein
+|   +---fdir
+|   +---file-selector
+|   |   |   +---bundles
+|   |   |   \---es2015
+|   |   \---src
+|   +---find-up
+|   |   \---src
+|   +---flatpickr
+|   |   |   +---esm
+|   |   |   |   +---l10n
+|   |   |   |   +---plugins
+|   |   |   |   |   +---confirmDate
+|   |   |   |   |   +---labelPlugin
+|   |   |   |   |   +---monthSelect
+|   |   |   |   |   \---weekSelect
+|   |   |   |   +---types
+|   |   |   |   \---utils
+|   |   |   +---l10n
+|   |   |   +---plugins
+|   |   |   |   +---confirmDate
+|   |   |   |   +---labelPlugin
+|   |   |   |   +---monthSelect
+|   |   |   |   \---weekSelect
+|   |   |   +---themes
+|   |   |   +---types
+|   |   |   \---utils
+|   |   \---src
+|   |       \---style
+|   |           \---themes
+|   +---flatted
+|   |   +---cjs
+|   |   +---esm
+|   |   +---php
+|   |   +---python
+|   |   \---types
+|   +---fraction.js
+|   +---gensync
+|   |   \---test
+|   +---glob-parent
+|   +---globals
+|   +---graceful-fs
+|   +---has-flag
+|   +---ignore
+|   +---import-fresh
+|   +---imurmurhash
+|   +---is-extglob
+|   +---is-glob
+|   +---isexe
+|   |   \---test
+|   +---jiti
+|   |   \---lib
+|   +---js-tokens
+|   +---js-yaml
+|   |   +---bin
+|   |   \---lib
+|   |       +---schema
+|   |       \---type
+|   +---jsesc
+|   |   +---bin
+|   |   \---man
+|   +---json-buffer
+|   |   \---test
+|   +---json-schema-traverse
+|   |   \---spec
+|   |       \---fixtures
+|   +---json-stable-stringify-without-jsonify
+|   |   +---example
+|   |   \---test
+|   +---json5
+|   |   \---lib
+|   +---keyv
+|   |   \---src
+|   +---levn
+|   |   \---lib
+|   +---lightningcss
+|   |   \---node
+|   +---lightningcss-win32-x64-msvc
+|   +---locate-path
+|   +---lodash
+|   |   \---fp
+|   +---lodash-es
+|   +---lodash.merge
+|   +---loose-envify
+|   +---magic-string
+|   +---minimatch
+|   +---minipass
+|   |       +---commonjs
+|   |       \---esm
+|   +---minizlib
+|   |       +---commonjs
+|   |       \---esm
+|   +---ms
+|   +---nanoid
+|   |   +---async
+|   |   +---bin
+|   |   +---non-secure
+|   |   \---url-alphabet
+|   +---natural-compare
+|   +---node-releases
+|   |   \---data
+|   |       +---processed
+|   |       \---release-schedule
+|   +---normalize-range
+|   +---object-assign
+|   +---optionator
+|   |   \---lib
+|   +---p-limit
+|   +---p-locate
+|   +---parent-module
+|   +---path-exists
+|   +---path-key
+|   +---picocolors
+|   +---picomatch
+|   |   \---lib
+|   +---postcss
+|   |   \---lib
+|   +---postcss-value-parser
+|   |   \---lib
+|   +---prelude-ls
+|   |   \---lib
+|   +---prop-types
+|   |   \---lib
+|   +---punycode
+|   +---react
+|   |   \---cjs
+|   +---react-apexcharts
+|   |   |   \---workflows
+|   |   \---types
+|   +---react-dom
+|   |   \---cjs
+|   +---react-dropzone
+|   |   +---.husky
+|   |   |   \---es
+|   |   |       \---utils
+|   |   +---examples
+|   |   |   +---accept
+|   |   |   +---basic
+|   |   |   +---class-component
+|   |   |   +---events
+|   |   |   +---file-dialog
+|   |   |   +---forms
+|   |   |   +---maxFiles
+|   |   |   +---no-jsx
+|   |   |   +---pintura
+|   |   |   +---plugins
+|   |   |   +---previews
+|   |   |   +---styling
+|   |   |   \---validator
+|   |   +---src
+|   |   |   +---utils
+|   |   |   \---__snapshots__
+|   |   \---typings
+|   |       \---tests
+|   +---react-flatpickr
+|   +---react-is
+|   |   +---cjs
+|   |   \---umd
+|   +---react-refresh
+|   |   \---cjs
+|   +---react-router
+|   |       +---development
+|   |       |   \---lib
+|   |       |       \---types
+|   |       \---production
+|   |           \---lib
+|   |               \---types
+|   +---react-router-dom
+|   +---resolve-from
+|   +---rollup
+|   |       +---bin
+|   |       +---es
+|   |       |   \---shared
+|   |       \---shared
+|   +---scheduler
+|   |   \---cjs
+|   +---semver
+|   |   \---bin
+|   +---set-cookie-parser
+|   |   \---lib
+|   +---shebang-command
+|   +---shebang-regex
+|   +---simplebar-core
+|   +---simplebar-react
+|   +---source-map-js
+|   |   \---lib
+|   +---strip-json-comments
+|   +---supports-color
+|   +---swiper
+|   |   +---modules
+|   |   +---shared
+|   |   \---types
+|   |       \---modules
+|   +---tailwind-merge
+|   |   |   \---es5
+|   |   \---src
+|   |       \---lib
+|   +---tailwindcss
+|   +---tapable
+|   |   \---lib
+|   +---tar
+|   |   |   +---commonjs
+|   |   |   \---esm
+|   |       \---yallist
+|   |               +---commonjs
+|   |               \---esm
+|   +---tinyglobby
+|   +---tslib
+|   |   \---modules
+|   +---type-check
+|   |   \---lib
+|   +---typescript
+|   |   +---bin
+|   |   \---lib
+|   |       +---cs
+|   |       +---de
+|   |       +---es
+|   |       +---fr
+|   |       +---it
+|   |       +---ja
+|   |       +---ko
+|   |       +---pl
+|   |       +---pt-br
+|   |       +---ru
+|   |       +---tr
+|   |       +---zh-cn
+|   |       \---zh-tw
+|   +---update-browserslist-db
+|   +---uri-js
+|   |       +---es5
+|   |       \---esnext
+|   |           \---schemes
+|   +---vite
+|   |   +---bin
+|   |   |   +---client
+|   |   |   \---node
+|   |   |       \---chunks
+|   |   +---misc
+|   |   \---types
+|   |       \---internal
+|   +---which
+|   |   \---bin
+|   +---word-wrap
+|   +---yallist
+|   \---yocto-queue
++---public
+|   \---images
+|       +---brand
+|       +---cards
+|       +---carousel
+|       +---chat
+|       +---country
+|       +---error
+|       +---grid-image
+|       +---icons
+|       +---logo
+|       +---product
+|       +---shape
+|       +---task
+|       +---user
+|       \---video-thumb
+\---src
+    +---components
+    |   +---charts
+    |   +---layout
+    |   \---ui
+    +---data
+    \---pages
