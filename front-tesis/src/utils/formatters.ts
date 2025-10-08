@@ -1,4 +1,4 @@
-import { FieldType } from "../config/entities";
+import type  { FieldType } from "../config/entities";
 
 const dateFormatter = new Intl.DateTimeFormat("es-EC", {
   year: "numeric",
