@@ -36,6 +36,9 @@ public class Tarea {
     @JoinColumn(name = "tar_asignado_a_id")
     private Usuario asignadoA;
 
+    @Column(name = "tar_nombre", length = 120)
+    private String nombre;
+
     @Column(name = "tar_descripcion", nullable = false, length = 200)
     private String descripcion;
 

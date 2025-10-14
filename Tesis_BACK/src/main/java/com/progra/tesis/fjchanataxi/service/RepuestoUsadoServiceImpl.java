@@ -29,16 +29,17 @@ public class RepuestoUsadoServiceImpl implements RepuestoUsadoService {
     private final OrdenMantenimientoRepository ordenRepository;
 
     @Override
-    public RepuestoUsadoDTO crear(Long tareaId, RepuestoUsadoDTO dto) {
-        Tarea tarea = obtenerTarea(tareaId);
+    public RepuestoUsadoDTO crear(RepuestoUsadoDTO dto) {
         RepuestoUsado repuesto = new RepuestoUsado();
-        repuesto.setTarea(tarea);
+        if (dto.getTareaId() != null) {
+            repuesto.setTarea(obtenerTarea(dto.getTareaId()));
+        }
         repuesto.setDescripcion(validarDescripcion(dto.getDescripcion()));
         repuesto.setCantidad(validarCantidad(dto.getCantidad()));
         repuesto.setCostoUnitario(validarCosto(dto.getCostoUnitario()));
 
         RepuestoUsado guardado = repuestoRepository.save(repuesto);
-        actualizarTotalesOrden(tarea.getOrden());
+        actualizarTotalesOrden(guardado.getTarea() != null ? guardado.getTarea().getOrden() : null);
         return toDTO(guardado);
     }
 
@@ -47,6 +48,20 @@ public class RepuestoUsadoServiceImpl implements RepuestoUsadoService {
         return repuestoRepository.findById(id)
                 .map(this::toDTO)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Repuesto no encontrado"));
+    }
+
+    @Override
+    public List<RepuestoUsadoDTO> listar() {
+        return repuestoRepository.findAllByOrderByDescripcionAsc().stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<RepuestoUsadoDTO> listarDisponibles() {
+        return repuestoRepository.findByTareaIsNullOrderByDescripcionAsc().stream()
+                .map(this::toDTO)
+                .toList();
     }
 
     @Override
@@ -74,6 +89,8 @@ public class RepuestoUsadoServiceImpl implements RepuestoUsadoService {
         RepuestoUsado repuesto = repuestoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Repuesto no encontrado"));
 
+        OrdenMantenimiento ordenAnterior = repuesto.getTarea() != null ? repuesto.getTarea().getOrden() : null;
+
         if (dto.getDescripcion() != null) {
             repuesto.setDescripcion(validarDescripcion(dto.getDescripcion()));
         }
@@ -83,9 +100,20 @@ public class RepuestoUsadoServiceImpl implements RepuestoUsadoService {
         if (dto.getCostoUnitario() != null) {
             repuesto.setCostoUnitario(validarCosto(dto.getCostoUnitario()));
         }
+        if (dto.getTareaId() != null) {
+            if (repuesto.getTarea() == null || !repuesto.getTarea().getId().equals(dto.getTareaId())) {
+                repuesto.setTarea(obtenerTarea(dto.getTareaId()));
+            }
+        } else if (dto.getTareaId() == null) {
+            repuesto.setTarea(null);
+        }
 
         RepuestoUsado actualizado = repuestoRepository.save(repuesto);
-        actualizarTotalesOrden(repuesto.getTarea().getOrden());
+        OrdenMantenimiento ordenActual = actualizado.getTarea() != null ? actualizado.getTarea().getOrden() : null;
+        if (ordenAnterior != null && (ordenActual == null || !ordenAnterior.getId().equals(ordenActual.getId()))) {
+            actualizarTotalesOrden(ordenAnterior);
+        }
+        actualizarTotalesOrden(ordenActual);
         return toDTO(actualizado);
     }
 
@@ -93,7 +121,7 @@ public class RepuestoUsadoServiceImpl implements RepuestoUsadoService {
     public void eliminar(Long id) {
         RepuestoUsado repuesto = repuestoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Repuesto no encontrado"));
-        OrdenMantenimiento orden = repuesto.getTarea().getOrden();
+        OrdenMantenimiento orden = repuesto.getTarea() != null ? repuesto.getTarea().getOrden() : null;
         repuestoRepository.delete(repuesto);
         actualizarTotalesOrden(orden);
     }
@@ -164,6 +192,7 @@ public class RepuestoUsadoServiceImpl implements RepuestoUsadoService {
         return RepuestoUsadoDTO.builder()
                 .id(repuesto.getId())
                 .tareaId(repuesto.getTarea() != null ? repuesto.getTarea().getId() : null)
+                .tareaNombre(repuesto.getTarea() != null ? repuesto.getTarea().getNombre() : null)
                 .descripcion(repuesto.getDescripcion())
                 .cantidad(repuesto.getCantidad())
                 .costoUnitario(repuesto.getCostoUnitario())

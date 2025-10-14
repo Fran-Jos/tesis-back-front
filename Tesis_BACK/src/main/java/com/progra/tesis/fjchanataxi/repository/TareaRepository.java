@@ -46,4 +46,17 @@ public interface TareaRepository extends JpaRepository<Tarea, Long> {
      * Uso: métricas y validaciones.
      */
     long countByOrdenId(Long ordenId);
+
+    /**
+     * Lista todas las tareas ordenadas alfabéticamente por nombre.
+     * @return lista de tareas
+     */
+    List<Tarea> findAllByOrderByNombreAsc();
+
+    /**
+     * Busca tareas cuyo nombre contenga una cadena.
+     * @param nombre texto a buscar
+     * @return lista limitada de tareas
+     */
+    List<Tarea> findTop20ByNombreContainingIgnoreCaseOrderByNombreAsc(String nombre);
 }

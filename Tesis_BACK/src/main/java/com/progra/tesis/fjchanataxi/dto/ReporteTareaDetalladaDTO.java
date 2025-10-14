@@ -17,6 +17,7 @@ public class ReporteTareaDetalladaDTO {
 
     private Long id;
     private EstadoTarea estado;
+    private String nombre;
     private String descripcion;
     private String asignadoANombre;
     private Double horas;

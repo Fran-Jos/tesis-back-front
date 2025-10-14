@@ -21,7 +21,7 @@ public class RepuestoUsado {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rep_tarea_id", nullable = false)
+    @JoinColumn(name = "rep_tarea_id")
     private Tarea tarea;
 
     @Column(name = "rep_descripcion", nullable = false, length = 200)

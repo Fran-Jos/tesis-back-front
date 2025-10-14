@@ -572,6 +572,7 @@ public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService 
         return ReporteTareaDetalladaDTO.builder()
                 .id(tarea.getId())
                 .estado(tarea.getEstado())
+                .nombre(tarea.getNombre())
                 .descripcion(tarea.getDescripcion())
                 .asignadoANombre(nombreCompleto(tarea.getAsignadoA()))
                 .horas(tarea.getHoras())
@@ -674,6 +675,7 @@ public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService 
             t.setAsignadoA(tecnico);
         }
         t.setEstado(dto.getEstado() != null ? dto.getEstado() : EstadoTarea.PENDIENTE);
+        t.setNombre(validarNombreTarea(dto.getNombre(), dto.getDescripcion()));
         t.setDescripcion(dto.getDescripcion());
         t.setHoras(dto.getHoras());
         t.setCostoManoObra(dto.getCostoManoObra());
@@ -748,13 +750,31 @@ public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService 
                 .id(t.getId()).ordenId(t.getOrden().getId()).estado(t.getEstado())
                 .asignadoAId(t.getAsignadoA() != null ? t.getAsignadoA().getId() : null)
                 .asignadoANombre(t.getAsignadoA() != null ? t.getAsignadoA().getNombre() + " " + t.getAsignadoA().getApellido() : null)
+                .nombre(t.getNombre())
                 .descripcion(t.getDescripcion()).horas(t.getHoras()).costoManoObra(t.getCostoManoObra())
                 .repuestos(t.getRepuestos() != null ? t.getRepuestos().stream().map(this::repuestoToDTO).toList() : List.of()).build();
     }
 
     private RepuestoUsadoDTO repuestoToDTO(RepuestoUsado r) {
         return RepuestoUsadoDTO.builder()
-                .id(r.getId()).tareaId(r.getTarea().getId()).descripcion(r.getDescripcion())
-                .cantidad(r.getCantidad()).costoUnitario(r.getCostoUnitario()).build();
+                .id(r.getId())
+                .tareaId(r.getTarea() != null ? r.getTarea().getId() : null)
+                .tareaNombre(r.getTarea() != null ? r.getTarea().getNombre() : null)
+                .descripcion(r.getDescripcion())
+                .cantidad(r.getCantidad())
+                .costoUnitario(r.getCostoUnitario())
+                .build();
+    }
+
+    private String validarNombreTarea(String nombre, String descripcion) {
+        String valor = nombre;
+        if (valor == null || valor.trim().isEmpty()) {
+            valor = descripcion;
+        }
+        if (valor == null || valor.trim().isEmpty()) {
+            throw new ReglaNegocioException("El nombre de la tarea es obligatorio");
+        }
+        valor = valor.trim();
+        return valor.length() > 120 ? valor.substring(0, 120) : valor;
     }
 }

@@ -71,6 +71,15 @@ const BookIcon: IconComponent = ({ className = "" }) => (
   </svg>
 );
 
+const ChartIcon: IconComponent = ({ className = "" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12 9 3.75l6 6 6.75-9" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 21V3.75" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 21v-11.25" />
+  </svg>
+);
+
 const entityIconMap: Record<string, IconComponent> = {
   vehiculos: FleetIcon,
   usuarios: UsersIcon,
@@ -84,6 +93,7 @@ const entityIconMap: Record<string, IconComponent> = {
 
 const mainNavigation: NavigationLink[] = [
   { name: "Dashboard", to: "/app/dashboard", icon: DashboardIcon },
+  { name: "Reportes", to: "/app/reportes/detallado", icon: ChartIcon },
   ...entityConfigs.map((entity) => ({
     name: entity.label,
     to: `/app/${entity.key}`,

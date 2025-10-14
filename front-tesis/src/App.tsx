@@ -8,6 +8,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import EntityListPage from "./pages/entities/EntityListPage";
 import EntityFormPage from "./pages/entities/EntityFormPage";
 import EntityDetailPage from "./pages/entities/EntityDetailPage";
+import MantenimientoDetalladoReportPage from "./pages/reports/MantenimientoDetalladoReportPage";
 
 const App = () => {
   return (
@@ -32,6 +33,10 @@ const App = () => {
                   ) : null}
                 </Route>
               ))}
+              <Route path="reportes" element={<Outlet />}>
+                <Route path="detallado" element={<MantenimientoDetalladoReportPage />} />
+                <Route index element={<Navigate to="detallado" replace />} />
+              </Route>
               <Route index element={<Navigate to="dashboard" replace />} />
             </Route>
           </Route>

@@ -20,6 +20,12 @@ public class TareaController {
 
     private final TareaService tareaService;
 
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    public ResponseEntity<List<TareaDTO>> listar(@RequestParam(required = false) String nombre) {
+        return ResponseEntity.ok(tareaService.listar(nombre));
+    }
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<TareaDTO> crear(@RequestBody TareaDTO dto) {

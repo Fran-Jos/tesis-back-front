@@ -25,6 +25,16 @@ const AppShell = () => {
       return { title: "Panel principal", subtitle: "Indicadores de mantenimiento" };
     }
 
+    if (segments[1] === "reportes") {
+      if (segments[2] === "detallado") {
+        return {
+          title: "Reporte detallado de mantenimiento",
+          subtitle: "Analiza tareas, repuestos y totales por orden",
+        };
+      }
+      return { title: "Reportes", subtitle: "Visualiza la información histórica del mantenimiento" };
+    }
+
     const entityKey = segments[1];
     const entityConfig = entityConfigMap[entityKey];
     if (!entityConfig) {

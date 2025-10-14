@@ -12,6 +12,7 @@ public interface TareaService {
 
     TareaDTO crear(Long ordenId, TareaDTO dto);                  // Alta ligada a una orden
     TareaDTO obtener(Long id);                                   // Detalle de tarea
+    List<TareaDTO> listar(String nombre);                        // Listado general (filtro por nombre)
     List<TareaDTO> listarPorOrden(Long ordenId);                 // Tareas por orden
     List<TareaDTO> listarPorTecnico(Long usuarioId, EstadoTarea estado); // Tareas de un técnico
     TareaDTO actualizar(Long id, TareaDTO dto);                  // Actualización parcial
