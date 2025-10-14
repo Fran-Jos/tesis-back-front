@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import AreaTrendChart from "../components/charts/AreaTrendChart";
+import BarComparisonChart from "../components/charts/BarComparisonChart";
 import GoalRadialChart from "../components/charts/GoalRadialChart";
+import PieDistributionChart from "../components/charts/PieDistributionChart";
 import MetricCard from "../components/ui/MetricCard";
 import api from "../lib/api";
 
@@ -24,6 +26,8 @@ const DashboardPage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [vehiculosList, setVehiculosList] = useState<Record<string, unknown>[]>([]);
+  const [ordenesList, setOrdenesList] = useState<Record<string, unknown>[]>([]);
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -53,10 +57,14 @@ const DashboardPage = () => {
           ordenesCerradas,
           alertasPendientes: alertas.length,
         });
+        setVehiculosList(vehiculos);
+        setOrdenesList(ordenes);
         setError(null);
       } catch (err) {
         const message = err instanceof Error ? err.message : "No se pudieron cargar los indicadores";
         setError(message);
+        setVehiculosList([]);
+        setOrdenesList([]);
       } finally {
         setLoading(false);
       }
@@ -72,6 +80,88 @@ const DashboardPage = () => {
     }
     return Math.round((metrics.ordenesCerradas / total) * 100);
   }, [metrics.ordenesAbiertas, metrics.ordenesCerradas]);
+
+  const ordenesPorEstado = useMemo(() => {
+    const statusOrder = ["ABIERTA", "EN_PROCESO", "CERRADA", "CANCELADA"] as const;
+    const statusLabels: Record<(typeof statusOrder)[number], string> = {
+      ABIERTA: "Abiertas",
+      EN_PROCESO: "En proceso",
+      CERRADA: "Cerradas",
+      CANCELADA: "Canceladas",
+    };
+
+    const counts: Record<string, number> = {};
+    statusOrder.forEach((status) => {
+      counts[status] = 0;
+    });
+
+    ordenesList.forEach((orden) => {
+      const estado = typeof orden.estado === "string" ? orden.estado : null;
+      if (!estado) {
+        return;
+      }
+      if (!(estado in counts)) {
+        counts[estado] = 0;
+      }
+      counts[estado] += 1;
+    });
+
+    const labels = statusOrder.map((status) => statusLabels[status]);
+    const series = statusOrder.map((status) => counts[status] ?? 0);
+
+    const extraStatuses = Object.keys(counts).filter(
+      (status): status is string => !statusOrder.includes(status as (typeof statusOrder)[number]),
+    );
+    if (extraStatuses.length > 0) {
+      const extraTotal = extraStatuses.reduce((sum, status) => sum + (counts[status] ?? 0), 0);
+      if (extraTotal > 0) {
+        labels.push("Otros");
+        series.push(extraTotal);
+      }
+    }
+
+    return { labels, series };
+  }, [ordenesList]);
+
+  const vehiculosPorEstado = useMemo(() => {
+    const statusOrder = ["ACTIVO", "INACTIVO"] as const;
+    const statusLabels: Record<(typeof statusOrder)[number], string> = {
+      ACTIVO: "Activos",
+      INACTIVO: "Inactivos",
+    };
+
+    const counts: Record<string, number> = {};
+    statusOrder.forEach((status) => {
+      counts[status] = 0;
+    });
+
+    vehiculosList.forEach((vehiculo) => {
+      const estado = typeof vehiculo.estado === "string" ? vehiculo.estado : null;
+      if (!estado) {
+        return;
+      }
+      if (!(estado in counts)) {
+        counts[estado] = 0;
+      }
+      counts[estado] += 1;
+    });
+
+    const labels = statusOrder.map((status) => statusLabels[status]);
+    const series = statusOrder.map((status) => counts[status] ?? 0);
+
+    const extraStatuses = Object.keys(counts).filter(
+      (status): status is string => !statusOrder.includes(status as (typeof statusOrder)[number]),
+    );
+    if (extraStatuses.length > 0) {
+      const extraTotal = extraStatuses.reduce((sum, status) => sum + (counts[status] ?? 0), 0);
+      if (extraTotal > 0) {
+        labels.push("Otros");
+        series.push(extraTotal);
+      }
+    }
+
+    return { labels, series };
+  }, [vehiculosList]);
 
   return (
     <div className="space-y-10">
@@ -138,6 +228,24 @@ const DashboardPage = () => {
             </p>
           </div>
         </div>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-2">
+        <PieDistributionChart
+          title="Distribución de órdenes"
+          subtitle="Estado actual de mantenimiento"
+          labels={ordenesPorEstado.labels}
+          series={ordenesPorEstado.series}
+          loading={loading}
+        />
+        <BarComparisonChart
+          title="Estado de la flota"
+          subtitle="Vehículos por disponibilidad"
+          categories={vehiculosPorEstado.labels}
+          series={vehiculosPorEstado.series}
+          loading={loading}
+          seriesName="Vehículos"
+        />
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-lg shadow-slate-900/5">

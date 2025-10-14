@@ -21,6 +21,7 @@ export type FieldConfig = {
     transformLabel?: (item: Record<string, unknown>) => string;
   };
   readOnly?: boolean;
+  readOnlyOnEdit?: boolean;
   hideOnCreate?: boolean;
   hideOnEdit?: boolean;
   defaultValue?: string | number | boolean | null;
@@ -152,11 +153,11 @@ export const entityConfigs: EntityConfig[] = [
     },
     form: {
       fields: [
-        { name: "placa", label: "Placa", type: "text", required: true },
+        { name: "placa", label: "Placa", type: "text", required: true, readOnlyOnEdit: true },
         { name: "marca", label: "Marca", type: "text", required: true },
         { name: "modelo", label: "Modelo", type: "text", required: true },
         { name: "anio", label: "Año", type: "number", required: true },
-        { name: "chasis", label: "Chasis", type: "text", required: true },
+        { name: "chasis", label: "Chasis", type: "text", required: true, readOnlyOnEdit: true },
         { name: "capacidadCarga", label: "Capacidad de carga (kg)", type: "decimal" },
         { name: "color", label: "Color", type: "text" },
         { name: "kmActual", label: "Kilometraje actual", type: "number" },
@@ -196,7 +197,7 @@ export const entityConfigs: EntityConfig[] = [
       fields: [
         { name: "nombre", label: "Nombre", type: "text", required: true },
         { name: "apellido", label: "Apellido", type: "text", required: true },
-        { name: "cedula", label: "Cédula", type: "text", required: true },
+        { name: "cedula", label: "Cédula", type: "text", required: true, readOnlyOnEdit: true },
         { name: "numeroCelular", label: "Celular", type: "text" },
         { name: "email", label: "Correo electrónico", type: "text", required: true },
         { name: "password", label: "Contraseña", type: "text", required: true, hideOnEdit: true },

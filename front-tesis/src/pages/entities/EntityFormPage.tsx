@@ -127,6 +127,9 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
   }, [config.apiPath, config.form.fields, isEdit, recordId]);
 
   const handleChange = (field: FieldConfig, value: unknown) => {
+    if (field.readOnly || (isEdit && field.readOnlyOnEdit)) {
+      return;
+    }
     setValues((prev) => ({ ...prev, [field.name]: value }));
   };
 
@@ -200,6 +203,7 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
             {visibleFields.map((field) => {
+              const isReadOnly = Boolean(field.readOnly || (isEdit && field.readOnlyOnEdit));
               const value = values[field.name];
               if (isBooleanField(field)) {
                 return (
@@ -208,7 +212,8 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
                       type="checkbox"
                       checked={Boolean(value)}
                       onChange={(event) => handleChange(field, event.target.checked)}
-                      className="size-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      disabled={isReadOnly}
+                      className="size-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 disabled:cursor-not-allowed"
                     />
                     {field.label}
                   </label>
@@ -226,11 +231,17 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
                       id={field.name}
                       value={value === null || value === undefined ? "" : String(value)}
                       onChange={(event) => {
+                        if (isReadOnly) {
+                          return;
+                        }
                         const selected = options.find((option) => option.value.toString() === event.target.value);
                         handleChange(field, selected ? selected.value : "");
                       }}
                       required={field.required}
-                      className="w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      disabled={isReadOnly}
+                      className={`w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 ${
+                        isReadOnly ? "bg-slate-100 text-slate-500 cursor-not-allowed" : ""
+                      }`}
                     >
                       <option value="">Selecciona una opción</option>
                       {options.map((option) => (
@@ -254,8 +265,16 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
                       required={field.required}
                       placeholder={field.placeholder}
                       value={value === null || value === undefined ? "" : String(value)}
-                      onChange={(event) => handleChange(field, event.target.value)}
-                      className="min-h-[120px] w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      onChange={(event) => {
+                        if (isReadOnly) {
+                          return;
+                        }
+                        handleChange(field, event.target.value);
+                      }}
+                      readOnly={isReadOnly}
+                      className={`min-h-[120px] w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 ${
+                        isReadOnly ? "bg-slate-100 text-slate-500 cursor-not-allowed" : ""
+                      }`}
                     />
                   </div>
                 );
@@ -274,8 +293,16 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
                     required={field.required}
                     placeholder={field.placeholder}
                     value={value === null || value === undefined ? "" : String(value)}
-                    onChange={(event) => handleChange(field, event.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    onChange={(event) => {
+                      if (isReadOnly) {
+                        return;
+                      }
+                      handleChange(field, event.target.value);
+                    }}
+                    readOnly={isReadOnly}
+                    className={`w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 ${
+                      isReadOnly ? "bg-slate-100 text-slate-500 cursor-not-allowed" : ""
+                    }`}
                   />
                 </div>
               );
