@@ -15,6 +15,7 @@ public class TareaDTO {
     private Long ordenId;               // FK (cuando se usa standalone)
     private Long asignadoAId;           // opcional perosna que realiza la tarea
     private String asignadoANombre;
+    private String nombre;              // nombre corto de la tarea
     private EstadoTarea estado;         // PENDIENTE | OK | NOK
     private String descripcion;
     private Double horas;               // opcional

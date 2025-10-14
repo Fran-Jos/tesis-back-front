@@ -10,8 +10,10 @@ import java.util.List;
  */
 public interface RepuestoUsadoService {
 
-    RepuestoUsadoDTO crear(Long tareaId, RepuestoUsadoDTO dto);            // Alta ligada a una tarea
+    RepuestoUsadoDTO crear(RepuestoUsadoDTO dto);                          // Alta (con o sin tarea)
     RepuestoUsadoDTO obtener(Long id);                                     // Detalle del repuesto
+    List<RepuestoUsadoDTO> listar();                                       // Todos los repuestos
+    List<RepuestoUsadoDTO> listarDisponibles();                            // Repuestos sin tarea asignada
     List<RepuestoUsadoDTO> listarPorTarea(Long tareaId);                   // Repuestos de una tarea
     List<RepuestoUsadoDTO> listarPorOrden(Long ordenId);                   // Repuestos de todas las tareas de una orden
     RepuestoUsadoDTO actualizar(Long id, RepuestoUsadoDTO dto);            // Actualización parcial

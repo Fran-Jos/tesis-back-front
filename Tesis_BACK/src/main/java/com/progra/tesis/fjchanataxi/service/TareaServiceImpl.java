@@ -36,6 +36,7 @@ public class TareaServiceImpl implements TareaService {
         OrdenMantenimiento orden = obtenerOrden(ordenId);
         Tarea tarea = new Tarea();
         tarea.setOrden(orden);
+        tarea.setNombre(validarNombre(dto.getNombre(), dto.getDescripcion()));
         tarea.setDescripcion(validarDescripcion(dto.getDescripcion()));
         tarea.setEstado(dto.getEstado() != null ? dto.getEstado() : EstadoTarea.PENDIENTE);
         tarea.setHoras(dto.getHoras());
@@ -61,6 +62,17 @@ public class TareaServiceImpl implements TareaService {
         return tareaRepository.findById(id)
                 .map(this::toDTO)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Tarea no encontrada"));
+    }
+
+    @Override
+    public List<TareaDTO> listar(String nombre) {
+        List<Tarea> tareas;
+        if (nombre != null && !nombre.trim().isEmpty()) {
+            tareas = tareaRepository.findTop20ByNombreContainingIgnoreCaseOrderByNombreAsc(nombre.trim());
+        } else {
+            tareas = tareaRepository.findAllByOrderByNombreAsc();
+        }
+        return tareas.stream().map(this::toDTO).toList();
     }
 
     @Override
@@ -92,6 +104,9 @@ public class TareaServiceImpl implements TareaService {
 
         if (dto.getDescripcion() != null) {
             tarea.setDescripcion(validarDescripcion(dto.getDescripcion()));
+        }
+        if (dto.getNombre() != null) {
+            tarea.setNombre(validarNombre(dto.getNombre(), dto.getDescripcion() != null ? dto.getDescripcion() : tarea.getDescripcion()));
         }
         if (dto.getHoras() != null) {
             tarea.setHoras(dto.getHoras());
@@ -187,7 +202,22 @@ public class TareaServiceImpl implements TareaService {
         return descripcion.trim();
     }
 
+    private String validarNombre(String nombre, String descripcionFallback) {
+        String valor = nombre;
+        if (valor == null || valor.trim().isEmpty()) {
+            valor = descripcionFallback;
+        }
+        if (valor == null || valor.trim().isEmpty()) {
+            throw new ReglaNegocioException("El nombre de la tarea es obligatorio");
+        }
+        valor = valor.trim();
+        return valor.length() > 120 ? valor.substring(0, 120) : valor;
+    }
+
     private RepuestoUsado crearRepuesto(Tarea tarea, RepuestoUsadoDTO dto) {
+        if (dto.getNombre() == null || dto.getNombre().trim().isEmpty()) {
+            throw new ReglaNegocioException("El nombre del repuesto es obligatorio");
+        }
         if (dto.getDescripcion() == null || dto.getDescripcion().trim().isEmpty()) {
             throw new ReglaNegocioException("La descripción del repuesto es obligatoria");
         }
@@ -199,6 +229,7 @@ public class TareaServiceImpl implements TareaService {
         }
         RepuestoUsado repuesto = new RepuestoUsado();
         repuesto.setTarea(tarea);
+        repuesto.setNombre(validarNombreRepuesto(dto.getNombre()));
         repuesto.setDescripcion(dto.getDescripcion().trim());
         repuesto.setCantidad(dto.getCantidad());
         repuesto.setCostoUnitario(dto.getCostoUnitario());
@@ -230,6 +261,9 @@ public class TareaServiceImpl implements TareaService {
                         .orElseThrow(() -> new RecursoNoEncontradoException("Repuesto no encontrado"));
                 if (dto.getDescripcion() != null) {
                     existente.setDescripcion(dto.getDescripcion().trim());
+                }
+                if (dto.getNombre() != null) {
+                    existente.setNombre(validarNombreRepuesto(dto.getNombre()));
                 }
                 if (dto.getCantidad() != null) {
                     existente.setCantidad(dto.getCantidad());
@@ -278,6 +312,7 @@ public class TareaServiceImpl implements TareaService {
                 .ordenId(tarea.getOrden() != null ? tarea.getOrden().getId() : null)
                 .asignadoAId(asignado != null ? asignado.getId() : null)
                 .asignadoANombre(asignado != null ? asignado.getNombre() + " " + asignado.getApellido() : null)
+                .nombre(tarea.getNombre())
                 .estado(tarea.getEstado())
                 .descripcion(tarea.getDescripcion())
                 .horas(tarea.getHoras())
@@ -291,9 +326,18 @@ public class TareaServiceImpl implements TareaService {
                 .id(repuesto.getId())
                 .tareaId(repuesto.getTarea() != null ? repuesto.getTarea().getId() : null)
                 .descripcion(repuesto.getDescripcion())
+                .nombre(repuesto.getNombre())
                 .cantidad(repuesto.getCantidad())
                 .costoUnitario(repuesto.getCostoUnitario())
                 .build();
+    }
+
+    private String validarNombreRepuesto(String nombre) {
+        String valor = nombre != null ? nombre.trim() : null;
+        if (valor == null || valor.isEmpty()) {
+            throw new ReglaNegocioException("El nombre del repuesto es obligatorio");
+        }
+        return valor.length() > 120 ? valor.substring(0, 120) : valor;
     }
 }
 

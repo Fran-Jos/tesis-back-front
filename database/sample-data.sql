@@ -113,13 +113,14 @@ INSERT INTO tarea (
 INSERT INTO repuesto_usado (
     rep_id,
     rep_tarea_id,
+    rep_nombre,
     rep_descripcion,
     rep_cantidad,
     rep_costo_unitario
 ) VALUES
-    (1, 1, 'Filtro de aceite Toyota 90915', 1.00, 18.50),
-    (2, 1, 'Aceite sintético 5W30 (litro)', 6.00, 8.50),
-    (3, 2, 'Pastillas de freno delanteras', 1.00, 40.00);
+    (1, 1, 'Filtro de aceite', 'Filtro de aceite Toyota 90915', 1.00, 18.50),
+    (2, 1, 'Aceite sintético 5W30', 'Aceite sintético 5W30 (litro)', 6.00, 8.50),
+    (3, 2, 'Pastillas de freno', 'Pastillas de freno delanteras', 1.00, 40.00);
 
 -- Alertas activas alineadas con los planes anteriores.
 INSERT INTO alerta (

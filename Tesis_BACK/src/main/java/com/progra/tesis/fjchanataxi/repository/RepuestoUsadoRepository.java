@@ -17,12 +17,24 @@ import java.util.List;
 public interface RepuestoUsadoRepository extends JpaRepository<RepuestoUsado, Long> {
 
     /**
+     * Lista todos los repuestos ordenados alfabéticamente.
+     * @return lista completa de repuestos
+     */
+    List<RepuestoUsado> findAllByOrderByNombreAscDescripcionAsc();
+
+    /**
      * Lista repuestos de una tarea.
      * @param tareaId id de la tarea
      * @return lista de repuestos
      * Uso: detalle de costos por tarea.
      */
     List<RepuestoUsado> findByTareaId(Long tareaId);
+
+    /**
+     * Lista repuestos que aún no se asignan a ninguna tarea.
+     * @return lista de repuestos libres
+     */
+    List<RepuestoUsado> findByTareaIsNullOrderByNombreAscDescripcionAsc();
 
     /**
      * Lista repuestos asociados a una orden (join por la tarea).

@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 public class RepuestoUsadoDTO {
     private Long id;
     private Long tareaId;               // FK (cuando se usa standalone)
+    private String tareaNombre;
+    private String nombre;
     private String descripcion;
     private BigDecimal cantidad;
     private BigDecimal costoUnitario;

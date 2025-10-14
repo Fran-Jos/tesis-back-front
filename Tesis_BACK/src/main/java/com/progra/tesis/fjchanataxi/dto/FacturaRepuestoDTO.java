@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Value
 @Builder
 public class FacturaRepuestoDTO {
+    String nombre;
     String descripcion;
     BigDecimal cantidad;
     BigDecimal costoUnitario;

@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 public class ReporteRepuestoDetalladoDTO {
 
     private Long id;
+    private String nombre;
     private String descripcion;
     private BigDecimal cantidad;
     private BigDecimal costoUnitario;

@@ -89,7 +89,7 @@ export type EntityConfig = {
   };
 };
 
-const enumOptions = {
+export const enumOptions = {
   roles: [
     { value: "ADMIN", label: "Administrador" },
     { value: "OPERADOR", label: "Operador" },
@@ -363,6 +363,7 @@ export const entityConfigs: EntityConfig[] = [
     searchKeys: ["descripcion", "asignadoANombre"],
     list: {
       columns: [
+        { field: "nombre", label: "Nombre" },
         { field: "descripcion", label: "Descripción" },
         { field: "estado", label: "Estado", type: "enum" },
         { field: "asignadoANombre", label: "Asignado a" },
@@ -399,6 +400,7 @@ export const entityConfigs: EntityConfig[] = [
             transformLabel: (orden) => `${orden.codigo as string} · ${orden.vehiculoPlaca as string}`,
           },
         },
+        { name: "nombre", label: "Nombre", type: "text", required: true },
         {
           name: "asignadoAId",
           label: "Asignado a",
@@ -418,6 +420,7 @@ export const entityConfigs: EntityConfig[] = [
     },
     detail: {
       fields: [
+        { field: "nombre", label: "Nombre" },
         { field: "descripcion", label: "Descripción" },
         { field: "estado", label: "Estado", type: "enum" },
         { field: "asignadoANombre", label: "Asignado a" },
@@ -434,29 +437,70 @@ export const entityConfigs: EntityConfig[] = [
     apiPath: "/repuestos-usados",
     label: "Repuestos",
     description: "Controla los repuestos utilizados en cada tarea.",
-    searchKeys: ["descripcion"],
+    searchKeys: ["nombre", "descripcion"],
     list: {
       columns: [
-        { field: "tareaId", label: "Tarea", type: "number" },
+        {
+          field: "tareaNombre",
+          label: "Tarea",
+          render: (value, row) => value ?? (row.tareaId ? `Tarea #${row.tareaId as number}` : "Sin asignar"),
+        },
+        { field: "nombre", label: "Nombre" },
         { field: "descripcion", label: "Descripción" },
         { field: "cantidad", label: "Cantidad", type: "decimal" },
         { field: "costoUnitario", label: "Costo unitario", type: "decimal" },
       ],
       filters: [
         {
+          name: "disponibilidad",
+          label: "Disponibilidad",
+          type: "select",
+          options: [
+            { value: "todos", label: "Todos" },
+            { value: "sinTarea", label: "Sin asignar" },
+          ],
+        },
+        {
           name: "tareaId",
-          label: "ID de tarea",
-          type: "text",
-          required: true,
-          placeholder: "Ej. 12",
+          label: "Tarea",
+          type: "select",
+          fetchOptions: {
+            endpoint: "/tareas",
+            valueKey: "id",
+            labelKey: "nombre",
+            transformLabel: (tarea) => {
+              const nombre = tarea.nombre as string;
+              const orden = tarea.ordenId ? ` · Orden #${tarea.ordenId as number}` : "";
+              return `${nombre}${orden}`;
+            },
+          },
         },
       ],
       endpoint: (filters) =>
-        filters.tareaId ? `/repuestos-usados/tarea/${filters.tareaId as string}` : null,
+        filters.tareaId
+          ? `/repuestos-usados/tarea/${filters.tareaId as string}`
+          : filters.disponibilidad === "sinTarea"
+            ? "/repuestos-usados?sinTarea=true"
+            : "/repuestos-usados",
     },
     form: {
       fields: [
-        { name: "tareaId", label: "ID de tarea", type: "number", required: true },
+        {
+          name: "tareaId",
+          label: "Tarea",
+          type: "select",
+          fetchOptions: {
+            endpoint: "/tareas",
+            valueKey: "id",
+            labelKey: "nombre",
+            transformLabel: (tarea) => {
+              const nombre = tarea.nombre as string;
+              const orden = tarea.ordenId ? ` · Orden #${tarea.ordenId as number}` : "";
+              return `${nombre}${orden}`;
+            },
+          },
+        },
+        { name: "nombre", label: "Nombre", type: "text", required: true },
         { name: "descripcion", label: "Descripción", type: "textarea", required: true },
         { name: "cantidad", label: "Cantidad", type: "decimal", required: true },
         { name: "costoUnitario", label: "Costo unitario", type: "decimal", required: true },
@@ -464,6 +508,12 @@ export const entityConfigs: EntityConfig[] = [
     },
     detail: {
       fields: [
+        {
+          field: "tareaNombre",
+          label: "Tarea",
+          render: (value, row) => value ?? (row.tareaId ? `Tarea #${row.tareaId as number}` : "Sin asignar"),
+        },
+        { field: "nombre", label: "Nombre" },
         { field: "descripcion", label: "Descripción" },
         { field: "cantidad", label: "Cantidad", type: "decimal" },
         { field: "costoUnitario", label: "Costo unitario", type: "decimal" },

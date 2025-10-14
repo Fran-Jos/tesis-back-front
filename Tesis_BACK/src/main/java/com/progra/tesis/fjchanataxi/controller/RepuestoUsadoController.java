@@ -23,8 +23,17 @@ public class RepuestoUsadoController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<RepuestoUsadoDTO> crear(@RequestBody RepuestoUsadoDTO dto) {
-        RepuestoUsadoDTO creado = repuestoService.crear(dto.getTareaId(), dto);
+        RepuestoUsadoDTO creado = repuestoService.crear(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    public ResponseEntity<List<RepuestoUsadoDTO>> listar(@RequestParam(required = false) Boolean sinTarea) {
+        if (Boolean.TRUE.equals(sinTarea)) {
+            return ResponseEntity.ok(repuestoService.listarDisponibles());
+        }
+        return ResponseEntity.ok(repuestoService.listar());
     }
 
     @GetMapping("/{id}")
