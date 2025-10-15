@@ -1,3 +1,9 @@
+/**
+ * Proyectos ficticios usados para ejemplificar tarjetas de progreso.
+ *
+ * Funcionan como placeholder hasta conectar con métricas reales; permiten
+ * validar la presentación de estados y porcentajes.
+ */
 const projects = [
   {
     id: "p1",

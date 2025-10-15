@@ -1,3 +1,10 @@
+/**
+ * Gráfico de áreas apiladas.
+ *
+ * Actualmente muestra datos de ejemplo para ilustrar tendencias. Sirve como
+ * plantilla para conectar futuros indicadores; el código comenta cómo se
+ * inicializan series y opciones.
+ */
 import { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
@@ -11,6 +18,7 @@ const AreaTrendChart = () => {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // Activamos el render sólo cuando el componente está montado en el navegador.
     setReady(true);
   }, []);
 
@@ -61,6 +69,7 @@ const AreaTrendChart = () => {
     },
   };
 
+  // Series de muestra; pueden reemplazarse por datos reales del backend.
   const series: Series = [
     {
       name: "Revenue",

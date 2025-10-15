@@ -1,3 +1,6 @@
+/**
+ * Cronología ficticia utilizada para ilustrar componentes de actividad reciente.
+ */
 const activityTimeline = [
   {
     id: "1",

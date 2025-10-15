@@ -1,3 +1,10 @@
+/**
+ * Datos de ejemplo para poblar la sección de equipo en el dashboard.
+ *
+ * Se usan avatares y roles ficticios únicamente para mostrar el componente de
+ * lista; estos valores pueden reemplazarse con información real del backend en
+ * el futuro.
+ */
 const teamMembers = [
   {
     id: "1",

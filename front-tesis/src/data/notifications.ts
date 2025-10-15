@@ -1,3 +1,9 @@
+/**
+ * Notificaciones mock utilizadas en secciones demostrativas.
+ *
+ * El Topbar ya consume datos reales de alertas, pero mantenemos este arreglo
+ * para componentes que necesiten contenido estático en demos o pruebas.
+ */
 const notifications = [
   {
     id: "1",

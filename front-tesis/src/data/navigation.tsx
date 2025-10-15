@@ -1,3 +1,10 @@
+/**
+ * Definición de los elementos de navegación del layout.
+ *
+ * El menú principal combina rutas estáticas (dashboard, reportes) con entradas
+ * dinámicas generadas a partir de las entidades configuradas en `config/entities`.
+ * También se documentan los íconos SVG utilizados.
+ */
 import type { ComponentType } from "react";
 import { entityConfigs } from "../config/entities";
 
@@ -80,6 +87,7 @@ const ChartIcon: IconComponent = ({ className = "" }) => (
   </svg>
 );
 
+// Asociamos cada entidad con un ícono para mostrarlo en el menú lateral.
 const entityIconMap: Record<string, IconComponent> = {
   vehiculos: FleetIcon,
   usuarios: UsersIcon,
@@ -91,6 +99,7 @@ const entityIconMap: Record<string, IconComponent> = {
   alertas: AlertIcon,
 };
 
+// Entradas principales que verá el usuario autenticado en el sidebar.
 const mainNavigation: NavigationLink[] = [
   { name: "Dashboard", to: "/app/dashboard", icon: DashboardIcon },
   { name: "Reportes", to: "/app/reportes/detallado", icon: ChartIcon },
@@ -101,6 +110,7 @@ const mainNavigation: NavigationLink[] = [
   })),
 ];
 
+// Exportamos la estructura final que consume `AppShell` para renderizar enlaces.
 const navigationItems: {
   main: NavigationLink[];
   secondary: NavigationItem[];

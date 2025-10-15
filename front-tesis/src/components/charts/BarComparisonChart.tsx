@@ -1,3 +1,10 @@
+/**
+ * Gráfico de barras categóricas.
+ *
+ * Recibe series precalculadas (por ejemplo conteos de órdenes por vehículo) y
+ * las representa en formato comparativo. La responsabilidad de obtener los datos
+ * recae en las páginas que lo consumen; aquí sólo documentamos cómo se pinta.
+ */
 import { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
@@ -23,6 +30,7 @@ const BarComparisonChart = ({
   loading,
   seriesName = "Total",
 }: BarComparisonChartProps) => {
+  // Flag que evita renderizados prematuros antes de montar el componente en el cliente.
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -85,6 +93,7 @@ const BarComparisonChart = ({
     },
   };
 
+  // Estructura de datos que ApexCharts espera para graficar la serie principal.
   const apexSeries = [{ name: seriesName, data: series }];
 
   return (

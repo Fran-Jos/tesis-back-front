@@ -1,3 +1,9 @@
+/**
+ * Hook auxiliar para consumir el contexto de autenticación.
+ *
+ * Centraliza la validación de que el componente esté envuelto por `AuthProvider`
+ * y expone helpers como `login`, `logout` y `user`.
+ */
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 

@@ -1,3 +1,9 @@
+/**
+ * Pantalla de inicio de sesión.
+ *
+ * Envia las credenciales al endpoint `/auth/login` usando el helper `useAuth`.
+ * Si el backend responde con éxito, redirige a la ruta protegida solicitada.
+ */
 import { FormEvent, useState } from "react";
 import { isAxiosError } from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -12,6 +18,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Maneja el envío del formulario y captura errores provenientes de Axios.
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);

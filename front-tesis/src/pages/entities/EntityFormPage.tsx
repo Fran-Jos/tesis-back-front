@@ -1,3 +1,9 @@
+/**
+ * Formulario dinámico para crear o editar entidades.
+ *
+ * Se basa completamente en la definición de `config.form.fields`. Cada campo
+ * puede tener valores por defecto, opciones remotas y reglas de visibilidad.
+ */
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { EntityConfig, FieldConfig, Option } from "../../config/entities";
@@ -26,6 +32,7 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
   const recordId = params.id;
   const isEdit = mode === "edit";
 
+  // Inicializamos el estado con los valores por defecto definidos en la configuración.
   const [values, setValues] = useState<ValuesState>(() => {
     const initial: ValuesState = {};
     config.form.fields.forEach((field) => {
@@ -88,6 +95,7 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
     void loadOptions();
   }, [config.form.fields]);
 
+  // Si estamos en modo edición, cargamos el registro existente desde la API.
   useEffect(() => {
     if (!isEdit || !recordId) {
       return;
@@ -126,6 +134,7 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
     void loadRecord();
   }, [config.apiPath, config.form.fields, isEdit, recordId]);
 
+  // Maneja cambios de inputs controlados asegurando que campos de solo lectura no se modifiquen.
   const handleChange = (field: FieldConfig, value: unknown) => {
     if (field.readOnly || (isEdit && field.readOnlyOnEdit)) {
       return;
@@ -133,6 +142,7 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
     setValues((prev) => ({ ...prev, [field.name]: value }));
   };
 
+  // Normaliza los valores y emite la petición HTTP adecuada (`post`, `put` o `patch`).
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);

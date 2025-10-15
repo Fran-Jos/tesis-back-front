@@ -1,3 +1,10 @@
+/**
+ * Reporte detallado de mantenimiento.
+ *
+ * Permite filtrar órdenes por rango de fechas, vehículo y estado, consultando
+ * los endpoints especializados del backend (`/ordenes/reportes/detallado`).
+ * También ofrece descarga en PDF.
+ */
 import { useEffect, useMemo, useState } from "react";
 import api from "../../lib/api";
 import { enumOptions } from "../../config/entities";
@@ -62,6 +69,7 @@ const defaultFilters: FiltersState = {
   estado: "",
 };
 
+// Ajusta el formato de fecha/hora si falta el componente de segundos.
 const normalizeDateTime = (value: string) => {
   if (!value) {
     return undefined;
@@ -69,6 +77,7 @@ const normalizeDateTime = (value: string) => {
   return value.length === 16 ? `${value}:00` : value;
 };
 
+// Construye el objeto `params` a partir de los filtros activos.
 const buildParams = (filters: FiltersState) => {
   const params: Record<string, string> = {};
   const desde = normalizeDateTime(filters.desde);
@@ -119,6 +128,7 @@ const MantenimientoDetalladoReportPage = () => {
 
   const estadoOptions = useMemo(() => enumOptions.estadoOrden ?? [], []);
 
+  // Ejecuta la consulta principal con los filtros seleccionados.
   const handleBuscar = async () => {
     setLoading(true);
     setError(null);
@@ -139,6 +149,7 @@ const MantenimientoDetalladoReportPage = () => {
     }
   };
 
+  // Permite buscar una orden específica por su código alfanumérico.
   const handleBuscarPorCodigo = async () => {
     if (!codigoBusqueda.trim()) {
       return;
@@ -157,6 +168,7 @@ const MantenimientoDetalladoReportPage = () => {
     }
   };
 
+  // Descarga el reporte en PDF aprovechando la respuesta binaria del backend.
   const handleDescargarPdf = async () => {
     setDownloadLoading(true);
     setDownloadError(null);

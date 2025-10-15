@@ -1,3 +1,10 @@
+/**
+ * Gráfico de dona para visualizar distribuciones (por ejemplo, órdenes por estado).
+ *
+ * Este componente solamente recibe datos agregados y los proyecta con ApexCharts.
+ * Se añade documentación para aclarar cómo se calcula el total y por qué se usan
+ * ciertos estilos.
+ */
 import { useEffect, useMemo, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
@@ -17,9 +24,11 @@ const PieDistributionChart = ({ title, subtitle, labels, series, colors, loading
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // Forzamos el render únicamente en cliente para evitar discrepancias con SSR.
     setReady(true);
   }, []);
 
+  // Sumatoria de los valores recibidos para mostrarlo dentro de la dona.
   const total = useMemo(() => series.reduce((sum, value) => sum + value, 0), [series]);
 
   const options: ApexOptions = {
@@ -77,6 +86,7 @@ const PieDistributionChart = ({ title, subtitle, labels, series, colors, loading
     },
   };
 
+  // Controlamos si existe información válida que justifique renderizar el gráfico.
   const hasData = total > 0;
 
   return (

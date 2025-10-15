@@ -1,3 +1,8 @@
+/**
+ * Agenda simulada para alimentar la vista de calendario.
+ *
+ * Genera eventos relativos a la fecha actual para que siempre se vean vigentes.
+ */
 const today = new Date();
 
 today.setHours(0, 0, 0, 0);

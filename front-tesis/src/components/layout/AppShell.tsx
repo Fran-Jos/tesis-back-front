@@ -1,16 +1,29 @@
+/**
+ * Layout principal de la aplicación.
+ *
+ * Este componente compone la estructura base de "panel + contenido" que comparten
+ * todas las vistas protegidas. Se apoya en los datos de navegación definidos en
+ * `data/navigation.tsx`, obtiene información del usuario autenticado a través del
+ * contexto (`useAuth`) y calcula el título/subtítulo activos en función de la ruta
+ * que entrega `react-router`.
+ */
 import { useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import clsx from "clsx";
-import navigationItems from "../../data/navigation";
-import Topbar from "./Topbar";
-import useAuth from "../../hooks/useAuth";
-import { entityConfigMap } from "../../config/entities";
+import navigationItems from "../../data/navigation"; // Menú principal configurado en un archivo de datos.
+import Topbar from "./Topbar"; // Barra superior reutilizable con acciones de usuario.
+import useAuth from "../../hooks/useAuth"; // Hook que expone identidad y logout.
+import { entityConfigMap } from "../../config/entities"; // Mapa para traducir la URL a metadatos descriptivos.
 
 const AppShell = () => {
+  // Estado local que controla si el sidebar está abierto en vista móvil.
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Obtenemos nombre, rol y acción de cierre de sesión desde el contexto global.
   const { user, logout } = useAuth();
+  // `useLocation` nos da la ruta actual para sincronizar la UI con la navegación.
   const location = useLocation();
 
+  // Derivamos títulos dinámicos en función de la ruta. Esto mantiene una UX consistente.
   const { title, subtitle } = useMemo(() => {
     const segments = location.pathname.split("/").filter(Boolean);
     if (segments.length === 0) {
@@ -83,6 +96,11 @@ const AppShell = () => {
           </button>
         </div>
 
+        {/**
+         * Menú lateral con dos secciones: navegación principal (rutas internas)
+         * y recursos secundarios (enlaces externos). `clsx` se usa para definir
+         * clases condicionales en función del estado activo.
+         */}
         <nav className="flex h-[calc(100vh-11rem)] flex-col space-y-6 overflow-y-auto pr-2">
           <div className="space-y-2">
             <p className="px-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
@@ -147,6 +165,10 @@ const AppShell = () => {
       </aside>
 
       <div className="flex flex-1 flex-col lg:pl-72">
+        {/**
+         * `Topbar` muestra el contexto de la página, el nombre del usuario y el menú
+         * para cerrar sesión. Se alimenta con los datos calculados anteriormente.
+         */}
         <Topbar
           onOpenSidebar={() => setSidebarOpen(true)}
           title={title}
@@ -156,6 +178,10 @@ const AppShell = () => {
           onLogout={logout}
           isSidebarOpen={sidebarOpen}
         />
+        {/**
+         * El `<Outlet />` renderiza la vista específica asociada a la ruta activa.
+         * Todas las páginas aprovechan este contenedor que provee paddings y anchos consistentes.
+         */}
         <main className="flex-1 px-4 pb-10 pt-28 sm:px-6 lg:px-10">
           <div className="mx-auto w-full max-w-7xl space-y-10">
             <Outlet />

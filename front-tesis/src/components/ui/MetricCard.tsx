@@ -1,3 +1,9 @@
+/**
+ * Tarjeta visual para resumir una métrica clave en el dashboard.
+ *
+ * Recibe valores ya calculados (por ejemplo, órdenes completadas) y únicamente
+ * se encarga de mostrar el número, la variación y un estado visual (subida/baja).
+ */
 type MetricCardProps = {
   title: string;
   value: string;

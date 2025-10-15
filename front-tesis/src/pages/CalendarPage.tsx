@@ -1,3 +1,8 @@
+/**
+ * Página de calendario basada en datos simulados.
+ *
+ * Agrupa los eventos por día de la semana para mostrar la carga de reuniones.
+ */
 import events from "../data/events";
 
 const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

@@ -1,3 +1,6 @@
+/**
+ * Vista de portafolio usando proyectos ficticios.
+ */
 import projects from "../data/projects";
 
 const statusColors: Record<string, string> = {

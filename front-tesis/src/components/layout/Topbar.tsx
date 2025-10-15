@@ -1,6 +1,14 @@
+/**
+ * Barra superior que aparece en todas las páginas autenticadas.
+ *
+ * Además de mostrar títulos, información del usuario y botones de acción, este
+ * componente consulta al backend (`lib/api.ts`) para obtener alertas de
+ * mantenimiento próximas o vencidas. Los comentarios explican el origen de los
+ * datos y cómo se calculan las etiquetas mostradas.
+ */
 import { useEffect, useMemo, useState } from "react";
-import clsx from "clsx";
-import api from "../../lib/api";
+import clsx from "clsx"; // Utilidad para componer clases Tailwind condicionalmente.
+import api from "../../lib/api"; // Cliente Axios configurado con la base URL del backend.
 
 type TopbarProps = {
   onOpenSidebar: () => void;
@@ -40,14 +48,18 @@ const Topbar = ({
   onLogout,
   isSidebarOpen,
 }: TopbarProps) => {
+  // Controla si el panel desplegable de notificaciones está abierto.
   const [open, setOpen] = useState(false);
+  // Listado de notificaciones transformadas desde las alertas que expone la API REST.
   const [notifications, setNotifications] = useState<AlertNotification[]>([]);
+  // Flags para mostrar estados de carga/errores mientras esperamos la respuesta del backend.
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationsError, setNotificationsError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
+    // Consumimos dos endpoints (`/alertas/vencidas` y `/alertas/proximas`) para construir la bandeja.
     const fetchNotifications = async () => {
       setLoadingNotifications(true);
       try {
@@ -57,6 +69,7 @@ const Topbar = ({
         ]);
 
         const now = new Date();
+        // Unificamos las respuestas eliminando registros nulos.
         const normalizeAlerts = [...(vencidasRes.data ?? []), ...(proximasRes.data ?? [])];
 
         const uniqueAlerts = normalizeAlerts.filter((alerta, index, self) => {
@@ -73,6 +86,7 @@ const Topbar = ({
           });
         });
 
+        // Formateador para mostrar la fecha programada de una forma legible en español (Ecuador).
         const formatter = new Intl.DateTimeFormat("es-EC", {
           day: "2-digit",
           month: "short",
@@ -156,6 +170,7 @@ const Topbar = ({
     };
   }, []);
 
+  // Memoriza el número de alertas para mostrarlo en el badge del botón de campana.
   const badgeCount = useMemo(() => notifications.length, [notifications.length]);
 
   return (

@@ -1,3 +1,6 @@
+/**
+ * Página que muestra integrantes de equipo usando datos mock.
+ */
 import teamMembers from "../data/team";
 
 const TeamPage = () => {

@@ -1,3 +1,10 @@
+/**
+ * Vista genérica para listar entidades configuradas en `config/entities`.
+ *
+ * Se alimenta con un objeto `EntityConfig` que describe columnas, filtros y
+ * permisos. El componente se encarga de consultar el endpoint indicado,
+ * renderizar la tabla y gestionar acciones CRUD básicas.
+ */
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import type { EntityConfig, Option } from "../../config/entities";
@@ -18,9 +25,12 @@ type FetchState = {
 };
 
 const EntityListPage = ({ config }: EntityListPageProps) => {
+  // Datos obtenidos desde la API correspondiente (definida en `config.apiPath`).
   const [items, setItems] = useState<ItemRecord[]>([]);
+  // Estado para manejar loading/error de la petición principal.
   const [fetchState, setFetchState] = useState<FetchState>({ loading: true, error: null });
   const [searchTerm, setSearchTerm] = useState("");
+  // Cada filtro se inicializa según la configuración para mantener controlados sus valores.
   const [filters, setFilters] = useState<FilterState>(() => {
     const initial: FilterState = {};
     config.list.filters?.forEach((filter) => {
@@ -28,6 +38,7 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     });
     return initial;
   });
+  // Las opciones dinámicas (como selects remotos) se cargan y guardan aquí para reuso.
   const [filterOptions, setFilterOptions] = useState<Record<string, Option[]>>({});
 
   const loadFilterOptions = async () => {
@@ -75,6 +86,7 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     return config.apiPath;
   }, [config.apiPath, config.list.endpoint, filters]);
 
+  // Consulta el listado cada vez que cambia el endpoint (por filtros dinámicos, etc.).
   useEffect(() => {
     const loadItems = async () => {
       if (!resolvedEndpoint) {
@@ -99,6 +111,7 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     void loadItems();
   }, [resolvedEndpoint]);
 
+  // Filtrado en memoria usando las claves declaradas en `config.searchKeys`.
   const filteredItems = useMemo(() => {
     if (!searchTerm || !config.searchKeys?.length) {
       return items;
@@ -116,6 +129,7 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     );
   }, [config.searchKeys, items, searchTerm]);
 
+  // Elimina un registro llamando al endpoint `/entidad/:id` cuando la entidad lo permite.
   const handleDelete = async (item: ItemRecord) => {
     if (!item.id) {
       return;

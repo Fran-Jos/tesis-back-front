@@ -1,3 +1,9 @@
+/**
+ * Lista de tareas ficticias para las tarjetas de actividad.
+ *
+ * Cuando se conecte a la API real se puede reemplazar con datos obtenidos desde
+ * `/ordenes` o endpoints similares.
+ */
 const tasks = [
   {
     id: "1",

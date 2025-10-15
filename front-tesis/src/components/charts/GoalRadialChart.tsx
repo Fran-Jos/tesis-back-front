@@ -1,3 +1,11 @@
+/**
+ * Componente que encapsula un gráfico radial para mostrar porcentajes de avance.
+ *
+ * Utiliza la librería ApexCharts (a través del wrapper `react-apexcharts`). Este
+ * archivo únicamente define opciones visuales y recibe los datos calculados por
+ * las páginas que lo usan. Los comentarios explican qué representa cada sección
+ * del gráfico y cómo se inicializa.
+ */
 import { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
@@ -9,9 +17,11 @@ type GoalRadialChartProps = {
 };
 
 const GoalRadialChart = ({ label, value, color = "#6366f1" }: GoalRadialChartProps) => {
+  // `ready` evita que el gráfico se renderice en SSR/hidrataciones antes de tener el DOM listo.
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // Una vez montado el componente en el cliente, habilitamos el render.
     setReady(true);
   }, []);
 
@@ -44,6 +54,7 @@ const GoalRadialChart = ({ label, value, color = "#6366f1" }: GoalRadialChartPro
     labels: [label],
   };
 
+  // `series` es la entrada numérica para ApexCharts; representa el porcentaje actual.
   const series = [value];
 
   if (!ready) return null;

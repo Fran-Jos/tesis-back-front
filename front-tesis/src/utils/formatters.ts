@@ -1,4 +1,7 @@
-import type  { FieldType } from "../config/entities";
+/**
+ * Utilidades de formato reutilizadas por tablas, formularios y reportes.
+ */
+import type { FieldType } from "../config/entities";
 
 const dateFormatter = new Intl.DateTimeFormat("es-EC", {
   year: "numeric",
@@ -19,6 +22,9 @@ const decimalFormatter = new Intl.NumberFormat("es-EC", {
   maximumFractionDigits: 2,
 });
 
+/**
+ * Formatea valores para mostrarlos en pantalla según el tipo declarado en la configuración.
+ */
 export const formatValue = (value: unknown, type?: FieldType | "enum" | "datetime" | "chip") => {
   if (value === null || value === undefined || value === "") {
     return "-";
@@ -45,6 +51,9 @@ export const formatValue = (value: unknown, type?: FieldType | "enum" | "datetim
   }
 };
 
+/**
+ * Convierte valores ingresados por el usuario al tipo apropiado antes de enviarlos al backend.
+ */
 export const parseValue = (value: string | number | boolean, type: FieldType) => {
   if (value === null || value === undefined) {
     return value;

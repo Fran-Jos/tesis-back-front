@@ -1,3 +1,9 @@
+/**
+ * Vista de detalle reutilizable para cualquier entidad configurada.
+ *
+ * Consulta el endpoint `/entidad/:id` y muestra los campos definidos en
+ * `config.detail.fields`. Permite navegar de regreso o editar según permisos.
+ */
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import type { EntityConfig } from "../../config/entities";

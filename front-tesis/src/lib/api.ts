@@ -1,3 +1,10 @@
+/**
+ * Cliente HTTP centralizado basado en Axios.
+ *
+ * Se configura con la URL base del backend (obtenida desde variables de entorno
+ * de Vite) y agrega automáticamente el token de autenticación a cada petición.
+ * También intercepta respuestas 401 para limpiar la sesión y redirigir al login.
+ */
 import axios from "axios";
 
 const api = axios.create({

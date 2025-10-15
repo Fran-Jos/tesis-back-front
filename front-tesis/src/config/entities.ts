@@ -1,3 +1,10 @@
+/**
+ * Configuración centralizada de todas las entidades CRUD que renderiza el frontend.
+ *
+ * Cada objeto describe cómo listar, crear, editar y detallar recursos que provienen
+ * del backend (por ejemplo `/vehiculos`). Las páginas de entidades consumen esta
+ * estructura para construir dinámicamente tablas, formularios y vistas de detalle.
+ */
 import type { ReactNode } from "react";
 
 export type FieldType = "text" | "textarea" | "number" | "decimal" | "select" | "date" | "datetime" | "boolean";
@@ -89,6 +96,7 @@ export type EntityConfig = {
   };
 };
 
+// Catálogos reutilizables para poblar selects y chips en tablas y formularios.
 export const enumOptions = {
   roles: [
     { value: "ADMIN", label: "Administrador" },
@@ -135,6 +143,7 @@ export const enumOptions = {
   ],
 };
 
+// Conjunto de entidades expuestas en el menú principal. Cada entrada define el endpoint REST (`apiPath`).
 export const entityConfigs: EntityConfig[] = [
   {
     key: "vehiculos",
