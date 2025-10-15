@@ -35,6 +35,8 @@ public interface PlanMantenimientoRepository extends JpaRepository<PlanMantenimi
 
     List<PlanMantenimiento> findByNombreContainingIgnoreCase(String nombre);
 
+    long countByVehiculoId(Long vehiculoId);
+
     /**
      * Busca un plan por id perteneciente a un vehículo específico.
      * @param id id del plan

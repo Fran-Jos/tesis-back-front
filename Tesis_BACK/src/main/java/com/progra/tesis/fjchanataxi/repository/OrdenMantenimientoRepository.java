@@ -61,6 +61,10 @@ public interface OrdenMantenimientoRepository extends JpaRepository<OrdenManteni
      */
     List<OrdenMantenimiento> findByVehiculoIdAndEstadoIn(Long vehiculoId, Collection<EstadoOrden> estados);
 
+    long countByVehiculoId(Long vehiculoId);
+
+    long countByVehiculoIdAndEstadoIn(Long vehiculoId, Collection<EstadoOrden> estados);
+
     /**
      * Página de órdenes por estado (con paginación/orden).
      * @param estado estado de la orden
@@ -106,4 +110,14 @@ public interface OrdenMantenimientoRepository extends JpaRepository<OrdenManteni
     @Query("select coalesce(sum(r.cantidad * r.costoUnitario), 0) " +
             "from RepuestoUsado r where r.tarea.orden.id = :ordenId")
     BigDecimal getSumaRepuestos(Long ordenId);
+
+    long countByPlanId(Long planId);
+
+    long countByPlanIdAndEstadoIn(Long planId, Collection<EstadoOrden> estados);
+
+    long countByCreadoPorId(Long usuarioId);
+
+    long countByResponsableId(Long usuarioId);
+
+    long countByResponsableIdAndEstadoIn(Long usuarioId, Collection<EstadoOrden> estados);
 }

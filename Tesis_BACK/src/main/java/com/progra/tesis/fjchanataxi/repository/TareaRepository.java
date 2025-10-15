@@ -59,4 +59,6 @@ public interface TareaRepository extends JpaRepository<Tarea, Long> {
      * @return lista limitada de tareas
      */
     List<Tarea> findTop20ByNombreContainingIgnoreCaseOrderByNombreAsc(String nombre);
+
+    long countByAsignadoAId(Long usuarioId);
 }

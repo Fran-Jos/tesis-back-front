@@ -2,9 +2,14 @@ package com.progra.tesis.fjchanataxi.service;
 
 import com.progra.tesis.fjchanataxi.dto.UsuarioDTO;
 import com.progra.tesis.fjchanataxi.dto.UsuarioRespuestaDTO;
+import com.progra.tesis.fjchanataxi.enums.EstadoOrden;
 import com.progra.tesis.fjchanataxi.enums.EstadoUsuario;
 import com.progra.tesis.fjchanataxi.enums.Rol;
 import com.progra.tesis.fjchanataxi.model.Usuario;
+import com.progra.tesis.fjchanataxi.repository.AlertaRepository;
+import com.progra.tesis.fjchanataxi.repository.OrdenMantenimientoRepository;
+import com.progra.tesis.fjchanataxi.repository.RegistroKilometrajeRepository;
+import com.progra.tesis.fjchanataxi.repository.TareaRepository;
 import com.progra.tesis.fjchanataxi.repository.UsuarioRepository;
 import com.progra.tesis.fjchanataxi.service.exception.ReglaNegocioException;
 import com.progra.tesis.fjchanataxi.service.exception.RecursoNoEncontradoException;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 /** Lógica de negocio para Usuarios. */
@@ -22,6 +28,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OrdenMantenimientoRepository ordenRepository;
+    private final TareaRepository tareaRepository;
+    private final RegistroKilometrajeRepository registroRepository;
+    private final AlertaRepository alertaRepository;
 
     /** Crea un usuario validando unicidad de email y cédula. */
     @Override
@@ -64,6 +74,62 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void eliminar(Long id) {
         Usuario e = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+
+        List<String> bloqueos = new ArrayList<>();
+
+        long ordenesCreadas = ordenRepository.countByCreadoPorId(id);
+        if (ordenesCreadas > 0) {
+            bloqueos.add(formatoBloqueo(ordenesCreadas,
+                    "orden de mantenimiento creada por el usuario",
+                    "órdenes de mantenimiento creadas por el usuario",
+                    "Actualiza esas órdenes para asignar otro creador"));
+        }
+
+        long ordenesTotalResponsable = ordenRepository.countByResponsableId(id);
+        if (ordenesTotalResponsable > 0) {
+            long ordenesActivas = ordenRepository.countByResponsableIdAndEstadoIn(id, EnumSet.of(EstadoOrden.ABIERTA, EstadoOrden.EN_PROCESO));
+            String detalleActivas = ordenesActivas > 0
+                    ? String.format(", con %d %s en curso",
+                    ordenesActivas,
+                    ordenesActivas == 1 ? "orden" : "órdenes")
+                    : "";
+            bloqueos.add(String.format("figura como responsable en %d %s%s. Reasigna esas órdenes antes de eliminar al usuario",
+                    ordenesTotalResponsable,
+                    ordenesTotalResponsable == 1 ? "orden" : "órdenes",
+                    detalleActivas));
+        }
+
+        long tareasAsignadas = tareaRepository.countByAsignadoAId(id);
+        if (tareasAsignadas > 0) {
+            bloqueos.add(formatoBloqueo(tareasAsignadas,
+                    "tarea asignada",
+                    "tareas asignadas",
+                    "Reasigna o elimina esas tareas"));
+        }
+
+        long registros = registroRepository.countByUsuarioId(id);
+        if (registros > 0) {
+            bloqueos.add(formatoBloqueo(registros,
+                    "registro de kilometraje ingresado",
+                    "registros de kilometraje ingresados",
+                    "Elimina o reasigna esos registros"));
+        }
+
+        long alertasCreadas = alertaRepository.countByCreadaPorId(id);
+        if (alertasCreadas > 0) {
+            bloqueos.add(formatoBloqueo(alertasCreadas,
+                    "alerta registrada",
+                    "alertas registradas",
+                    "Actualiza o elimina esas alertas"));
+        }
+
+        if (!bloqueos.isEmpty()) {
+            String detalle = String.join(". ", bloqueos);
+            throw new ReglaNegocioException(String.format(
+                    "No se puede eliminar al usuario %s %s porque %s.",
+                    e.getNombre(), e.getApellido(), detalle));
+        }
+
         usuarioRepository.delete(e);
     }
 
@@ -190,5 +256,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private void validarMinimo(String s, int min, String msg) {
         if (s == null || s.length() < min) throw new ReglaNegocioException(msg);
+    }
+
+    private String formatoBloqueo(long cantidad, String singular, String plural, String accion) {
+        String descripcion = cantidad == 1 ? singular : plural;
+        return String.format("tiene %d %s. %s primero", cantidad, descripcion, accion);
     }
 }

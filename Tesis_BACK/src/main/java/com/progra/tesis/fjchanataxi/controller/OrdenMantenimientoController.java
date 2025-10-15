@@ -48,6 +48,12 @@ public class OrdenMantenimientoController {
         return ResponseEntity.ok(ordenService.obtener(id));
     }
 
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    public ResponseEntity<OrdenDTO> actualizar(@PathVariable @Min(1) Long id, @RequestBody OrdenDTO dto) {
+        return ResponseEntity.ok(ordenService.actualizar(id, dto));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> eliminar(@PathVariable @Min(1) Long id) {

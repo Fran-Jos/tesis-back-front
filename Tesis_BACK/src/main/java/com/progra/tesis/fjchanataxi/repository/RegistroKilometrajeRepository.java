@@ -63,4 +63,8 @@ public interface RegistroKilometrajeRepository extends JpaRepository<RegistroKil
      * @return Optional con el registro de mayor odómetro
      */
     Optional<RegistroKilometraje> findTopByVehiculoIdOrderByOdometroDesc(Long vehiculoId);
+
+    long countByVehiculoId(Long vehiculoId);
+
+    long countByUsuarioId(Long usuarioId);
 }

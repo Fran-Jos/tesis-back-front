@@ -109,6 +109,82 @@ public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService 
         return ordenRepo.findAll().stream().map(this::entityToDTO).toList();
     }
 
+    /** Actualiza datos generales de la orden sin tocar sus tareas. */
+    @Override
+    public OrdenDTO actualizar(Long id, OrdenDTO dto) {
+        if (id == null || id <= 0) {
+            throw new ReglaNegocioException("El identificador de la orden es obligatorio");
+        }
+
+        OrdenMantenimiento om = ordenRepo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Orden no encontrada"));
+
+        if (dto.getCodigo() != null) {
+            String codigo = dto.getCodigo().trim();
+            if (codigo.isBlank()) {
+                throw new ReglaNegocioException("El código es obligatorio");
+            }
+            if (!codigo.equalsIgnoreCase(om.getCodigo())
+                    && ordenRepo.findByCodigo(codigo).isPresent()) {
+                throw new ReglaNegocioException("Código de orden ya existe");
+            }
+            om.setCodigo(codigo);
+        }
+
+        if (dto.getTipo() != null) {
+            om.setTipo(dto.getTipo());
+        }
+
+        if (dto.getEstado() != null) {
+            if (om.getEstado() == EstadoOrden.CERRADA && dto.getEstado() != EstadoOrden.CERRADA) {
+                throw new ReglaNegocioException("No es posible reabrir una orden que ya fue cerrada");
+            }
+            om.setEstado(dto.getEstado());
+        }
+
+        if (dto.getVehiculoId() != null && !dto.getVehiculoId().equals(om.getVehiculo().getId())) {
+            Vehiculo vehiculo = vehiculoRepo.findById(dto.getVehiculoId())
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Vehículo no existe"));
+            om.setVehiculo(vehiculo);
+        }
+
+        if (dto.getPlanId() != null) {
+            PlanMantenimiento plan = planRepo.findById(dto.getPlanId())
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Plan no existe"));
+            if (!plan.getVehiculo().getId().equals(om.getVehiculo().getId())) {
+                throw new ReglaNegocioException("El plan seleccionado pertenece a otro vehículo");
+            }
+            om.setPlan(plan);
+        }
+        if (dto.getPlanId() == null && om.getPlan() != null) {
+            om.setPlan(null);
+        }
+
+        if (dto.getResponsableId() != null) {
+            Usuario responsable = usuarioRepo.findById(dto.getResponsableId())
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Usuario (responsable) no existe"));
+            om.setResponsable(responsable);
+        }
+        if (dto.getResponsableId() == null) {
+            om.setResponsable(null);
+        }
+
+        if (dto.getFechaApertura() != null) {
+            om.setFechaApertura(dto.getFechaApertura());
+        }
+        if (dto.getFechaCierre() != null) {
+            om.setFechaCierre(dto.getFechaCierre());
+        }
+
+        if (dto.getIvaPorc() != null) {
+            om.setIvaPorc(dto.getIvaPorc());
+        }
+
+        recalcularTotales(om);
+        OrdenMantenimiento actualizado = ordenRepo.save(om);
+        return entityToDTO(actualizado);
+    }
+
     /** Elimina una orden por id (si tu negocio lo permite). */
     @Override public void eliminar(Long id) {
         OrdenMantenimiento om = ordenRepo.findById(id)

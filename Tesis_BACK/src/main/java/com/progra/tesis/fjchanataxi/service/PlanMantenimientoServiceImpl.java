@@ -1,14 +1,15 @@
 package com.progra.tesis.fjchanataxi.service;
 
 import com.progra.tesis.fjchanataxi.dto.PlanDTO;
-
-import com.progra.tesis.fjchanataxi.model.PlanMantenimiento;
 import com.progra.tesis.fjchanataxi.enums.ClasificacionAlerta;
 import com.progra.tesis.fjchanataxi.enums.EstadoAlerta;
+import com.progra.tesis.fjchanataxi.enums.EstadoOrden;
 import com.progra.tesis.fjchanataxi.enums.TipoAlerta;
 import com.progra.tesis.fjchanataxi.model.Alerta;
-import com.progra.tesis.fjchanataxi.repository.AlertaRepository;
+import com.progra.tesis.fjchanataxi.model.PlanMantenimiento;
 import com.progra.tesis.fjchanataxi.model.Vehiculo;
+import com.progra.tesis.fjchanataxi.repository.AlertaRepository;
+import com.progra.tesis.fjchanataxi.repository.OrdenMantenimientoRepository;
 import com.progra.tesis.fjchanataxi.repository.PlanMantenimientoRepository;
 import com.progra.tesis.fjchanataxi.repository.VehiculoRepository;
 import com.progra.tesis.fjchanataxi.service.exception.ReglaNegocioException;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 /** Lógica de negocio para Planes de Mantenimiento. */
@@ -29,6 +32,7 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
     private final PlanMantenimientoRepository planRepo;
     private final VehiculoRepository vehiculoRepo;
     private final AlertaRepository alertaRepo;
+    private final OrdenMantenimientoRepository ordenRepo;
 
     /** Crea un plan para un vehículo. */
     @Override
@@ -64,6 +68,45 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
     public void eliminar(Long id) {
         PlanMantenimiento p = planRepo.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Plan no encontrado"));
+
+        List<String> bloqueos = new ArrayList<>();
+
+        long ordenesTotales = ordenRepo.countByPlanId(id);
+        if (ordenesTotales > 0) {
+            long ordenesActivas = ordenRepo.countByPlanIdAndEstadoIn(id, EnumSet.of(EstadoOrden.ABIERTA, EstadoOrden.EN_PROCESO));
+            String detalleActivas = ordenesActivas > 0
+                    ? String.format(", con %d %s en curso",
+                    ordenesActivas,
+                    ordenesActivas == 1 ? "orden" : "órdenes")
+                    : "";
+            bloqueos.add(String.format("está asociado a %d %s%s. Cierre, reasigne o elimine esas órdenes",
+                    ordenesTotales,
+                    ordenesTotales == 1 ? "orden de mantenimiento" : "órdenes de mantenimiento",
+                    detalleActivas));
+        }
+
+        long alertasPendientes = alertaRepo.countByPlanIdAndEstado(id, EstadoAlerta.PENDIENTE);
+        if (alertasPendientes > 0) {
+            bloqueos.add(String.format("posee %d %s pendientes. Actualice o elimine esas alertas",
+                    alertasPendientes,
+                    alertasPendientes == 1 ? "alerta" : "alertas"));
+        }
+
+        long alertasTotales = alertaRepo.countByPlanId(id);
+        if (alertasTotales > alertasPendientes) {
+            long historicas = alertasTotales - alertasPendientes;
+            bloqueos.add(String.format("mantiene %d %s históricas asociadas. Limpie el historial de alertas",
+                    historicas,
+                    historicas == 1 ? "alerta" : "alertas"));
+        }
+
+        if (!bloqueos.isEmpty()) {
+            String detalle = String.join(". ", bloqueos);
+            throw new ReglaNegocioException(String.format(
+                    "No se puede eliminar el plan %s porque %s.",
+                    p.getNombre(), detalle));
+        }
+
         planRepo.delete(p);
     }
 

@@ -99,4 +99,12 @@ public interface AlertaRepository extends JpaRepository<Alerta, Long> {
      * Uso: informes y trazabilidad.
      */
     List<Alerta> findByOrdenAtendidaId(Long ordenId);
+
+    long countByVehiculoId(Long vehiculoId);
+
+    long countByPlanId(Long planId);
+
+    long countByPlanIdAndEstado(Long planId, EstadoAlerta estado);
+
+    long countByCreadaPorId(Long usuarioId);
 }

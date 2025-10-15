@@ -1,8 +1,12 @@
 package com.progra.tesis.fjchanataxi.service;
 
 import com.progra.tesis.fjchanataxi.dto.VehiculoDTO;
-
+import com.progra.tesis.fjchanataxi.enums.EstadoOrden;
 import com.progra.tesis.fjchanataxi.model.Vehiculo;
+import com.progra.tesis.fjchanataxi.repository.AlertaRepository;
+import com.progra.tesis.fjchanataxi.repository.OrdenMantenimientoRepository;
+import com.progra.tesis.fjchanataxi.repository.PlanMantenimientoRepository;
+import com.progra.tesis.fjchanataxi.repository.RegistroKilometrajeRepository;
 import com.progra.tesis.fjchanataxi.repository.VehiculoRepository;
 import com.progra.tesis.fjchanataxi.service.exception.ReglaNegocioException;
 import com.progra.tesis.fjchanataxi.service.exception.RecursoNoEncontradoException;
@@ -11,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 /** Lógica de negocio para Vehículos. */
@@ -18,6 +23,10 @@ import java.util.List;
 public class VehiculoServiceImpl implements VehiculoService {
 
     private final VehiculoRepository vehiculoRepository;
+    private final PlanMantenimientoRepository planRepository;
+    private final OrdenMantenimientoRepository ordenRepository;
+    private final RegistroKilometrajeRepository registroRepository;
+    private final AlertaRepository alertaRepository;
 
     /** Crea un vehículo validando unicidad de placa. */
     @Override
@@ -60,6 +69,54 @@ public class VehiculoServiceImpl implements VehiculoService {
     public void eliminar(Long id) {
         Vehiculo e = vehiculoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Vehículo no encontrado"));
+
+        List<String> bloqueos = new ArrayList<>();
+
+        long planes = planRepository.countByVehiculoId(id);
+        if (planes > 0) {
+            bloqueos.add(formatoBloqueo(planes,
+                    "plan de mantenimiento asociado",
+                    "planes de mantenimiento asociados",
+                    "Elimine o reasigne esos planes"));
+        }
+
+        long ordenesTotales = ordenRepository.countByVehiculoId(id);
+        if (ordenesTotales > 0) {
+            long ordenesActivas = ordenRepository.countByVehiculoIdAndEstadoIn(id, EnumSet.of(EstadoOrden.ABIERTA, EstadoOrden.EN_PROCESO));
+            String detalleActivas = ordenesActivas > 0
+                    ? String.format(", de las cuales %d %s en curso",
+                    ordenesActivas,
+                    ordenesActivas == 1 ? "está" : "están")
+                    : "";
+            bloqueos.add(String.format("tiene %d %s%s. Cierre, reasigne o elimine dichas órdenes",
+                    ordenesTotales,
+                    ordenesTotales == 1 ? "orden de mantenimiento registrada" : "órdenes de mantenimiento registradas",
+                    detalleActivas));
+        }
+
+        long registros = registroRepository.countByVehiculoId(id);
+        if (registros > 0) {
+            bloqueos.add(formatoBloqueo(registros,
+                    "registro de kilometraje asociado",
+                    "registros de kilometraje asociados",
+                    "Elimine el historial de kilometraje"));
+        }
+
+        long alertas = alertaRepository.countByVehiculoId(id);
+        if (alertas > 0) {
+            bloqueos.add(formatoBloqueo(alertas,
+                    "alerta pendiente o histórica",
+                    "alertas pendientes o históricas",
+                    "Revise y elimine esas alertas"));
+        }
+
+        if (!bloqueos.isEmpty()) {
+            String detalle = String.join(". ", bloqueos);
+            throw new ReglaNegocioException(String.format(
+                    "No se puede eliminar el vehículo %s porque %s.",
+                    e.getPlaca(), detalle));
+        }
+
         vehiculoRepository.delete(e);
     }
 
@@ -175,5 +232,10 @@ public class VehiculoServiceImpl implements VehiculoService {
 
     private void validarMinimo(String s, int min, String msg) {
         if (s == null || s.length() < min) throw new ReglaNegocioException(msg);
+    }
+
+    private String formatoBloqueo(long cantidad, String singular, String plural, String accion) {
+        String descripcion = cantidad == 1 ? singular : plural;
+        return String.format("tiene %d %s. %s primero", cantidad, descripcion, accion);
     }
 }

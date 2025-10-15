@@ -383,7 +383,6 @@ export const entityConfigs: EntityConfig[] = [
         },
         { name: "ivaPorc", label: "IVA (%)", type: "decimal" },
       ],
-      disableEdit: true,
     },
     detail: {
       fields: [

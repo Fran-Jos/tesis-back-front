@@ -6,6 +6,7 @@
  */
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import type { EntityConfig, FieldConfig, Option } from "../../config/entities";
 import api from "../../lib/api";
 
@@ -25,6 +26,28 @@ type ValuesState = Record<string, unknown>;
 type OptionsState = Record<string, Option[]>;
 
 const isBooleanField = (field: FieldConfig) => field.type === "boolean";
+
+const resolveErrorMessage = (error: unknown, fallback: string) => {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data;
+    if (typeof data === "string" && data.trim().length > 0) {
+      return data;
+    }
+    if (data && typeof data === "object" && "message" in data) {
+      const message = (data as { message?: unknown }).message;
+      if (typeof message === "string" && message.trim().length > 0) {
+        return message;
+      }
+    }
+    if (typeof error.message === "string" && error.message.trim().length > 0) {
+      return error.message;
+    }
+  }
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+  return fallback;
+};
 
 const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
   const navigate = useNavigate();
@@ -124,8 +147,7 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
         });
         setError(null);
       } catch (err) {
-        const message = err instanceof Error ? err.message : "No se pudo cargar el registro";
-        setError(message);
+        setError(resolveErrorMessage(err, "No se pudo cargar el registro"));
       } finally {
         setLoading(false);
       }
@@ -180,8 +202,7 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
       await request(endpoint, payload);
       navigate(`/app/${config.key}`);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "No se pudo guardar la información";
-      setError(message);
+      setError(resolveErrorMessage(err, "No se pudo guardar la información"));
     } finally {
       setSaving(false);
     }

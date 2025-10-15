@@ -13,6 +13,7 @@ public interface OrdenMantenimientoService {
     OrdenDTO crear(OrdenDTO dto);                                // Crear OM (con o sin tareas)
     OrdenDTO obtener(Long id);                                   // Detalle
     List<OrdenDTO> listar();                                     // Listado
+    OrdenDTO actualizar(Long id, OrdenDTO dto);                  // Actualizar cabecera de la OM
     void eliminar(Long id);                                               // Eliminar OM (si negocio lo permite)
 
     // Tareas y repuestos

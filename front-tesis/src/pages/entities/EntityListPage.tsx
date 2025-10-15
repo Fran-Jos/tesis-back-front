@@ -7,6 +7,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import type { EntityConfig, Option } from "../../config/entities";
 import api from "../../lib/api";
 import { formatValue } from "../../utils/formatters";
@@ -86,6 +87,28 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     return config.apiPath;
   }, [config.apiPath, config.list.endpoint, filters]);
 
+  const resolveErrorMessage = (error: unknown, fallback: string) => {
+    if (axios.isAxiosError(error)) {
+      const data = error.response?.data;
+      if (typeof data === "string" && data.trim().length > 0) {
+        return data;
+      }
+      if (data && typeof data === "object" && "message" in data) {
+        const message = (data as { message?: unknown }).message;
+        if (typeof message === "string" && message.trim().length > 0) {
+          return message;
+        }
+      }
+      if (typeof error.message === "string" && error.message.trim().length > 0) {
+        return error.message;
+      }
+    }
+    if (error instanceof Error && error.message.trim().length > 0) {
+      return error.message;
+    }
+    return fallback;
+  };
+
   // Consulta el listado cada vez que cambia el endpoint (por filtros dinámicos, etc.).
   useEffect(() => {
     const loadItems = async () => {
@@ -102,7 +125,7 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
         setItems(data);
         setFetchState({ loading: false, error: null });
       } catch (error) {
-        const message = error instanceof Error ? error.message : "No se pudo cargar la información";
+        const message = resolveErrorMessage(error, "No se pudo cargar la información");
         setFetchState({ loading: false, error: message });
         setItems([]);
       }
@@ -145,7 +168,7 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
       await api.delete(`${config.apiPath}/${item.id}`);
       setItems((prev) => prev.filter((current) => current.id !== item.id));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "No se pudo eliminar el registro";
+      const message = resolveErrorMessage(error, "No se pudo eliminar el registro");
       alert(message);
     }
   };
