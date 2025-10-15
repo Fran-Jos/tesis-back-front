@@ -31,6 +31,12 @@ public interface PlanMantenimientoRepository extends JpaRepository<PlanMantenimi
      */
     List<PlanMantenimiento> findByActivoTrue();
 
+    /**
+     * Cuenta la cantidad de planes activos registrados.
+     * @return número total de planes activos
+     */
+    long countByActivoTrue();
+
     List<PlanMantenimiento> findByVehiculoId(Long vehiculoId);
 
     List<PlanMantenimiento> findByNombreContainingIgnoreCase(String nombre);

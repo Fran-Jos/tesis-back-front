@@ -39,6 +39,13 @@ public interface AlertaRepository extends JpaRepository<Alerta, Long> {
     List<Alerta> findByClasificacionOrderByFechaProgramadaAsc(ClasificacionAlerta clasificacion);
 
     /**
+     * Cuenta alertas por estado (ej. PENDIENTE).
+     * @param estado estado de la alerta
+     * @return número de alertas en ese estado
+     */
+    long countByEstado(EstadoAlerta estado);
+
+    /**
      * Verifica si ya existe una alerta con mismo vehículo, plan, tipo y estado.
      * @param vehiculoId id del vehículo
      * @param planId id del plan (puede ser null si no aplica)

@@ -73,6 +73,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     List<Usuario> findByNombreContainingIgnoreCaseAndApellidoContainingIgnoreCase(String nombre, String apellido);
 
+    /**
+     * Cuenta usuarios por rol y estado.
+     * @param rol rol del usuario
+     * @param estado estado del usuario
+     * @return cantidad de usuarios que cumplen las condiciones
+     */
+    long countByRolAndEstado(Rol rol, EstadoUsuario estado);
+
     @Query("select u from Usuario u where lower(u.nombre) like lower(concat('%', :token, '%')) " +
             "or lower(u.apellido) like lower(concat('%', :token, '%')) " +
             "or lower(u.email) like lower(concat('%', :token, '%')) " +

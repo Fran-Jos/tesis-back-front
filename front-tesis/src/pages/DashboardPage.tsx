@@ -12,6 +12,47 @@ type DashboardMetrics = {
   ordenesAbiertas: number;
   ordenesCerradas: number;
   alertasPendientes: number;
+  tecnicosActivos: number;
+};
+
+type DashboardVehiculo = {
+  id: number;
+  placa: string;
+  marca?: string | null;
+  modelo?: string | null;
+  anio?: number | null;
+  estado?: string | null;
+  kmActual?: number | null;
+};
+
+type DashboardOrden = {
+  id: number;
+  codigo: string;
+  estado: string | null;
+  tipo: string | null;
+  fechaApertura: string | null;
+  fechaCierre: string | null;
+  vehiculoId: number | null;
+  vehiculoPlaca: string | null;
+};
+
+type DashboardTarea = {
+  id: number;
+  nombre: string | null;
+  estado: string | null;
+  asignadoANombre: string | null;
+};
+
+type DashboardSummaryResponse = {
+  vehiculos: number;
+  planesActivos: number;
+  ordenesAbiertas: number;
+  ordenesCerradas: number;
+  alertasPendientes: number;
+  tecnicosActivos: number;
+  vehiculosList: DashboardVehiculo[];
+  ordenesList: DashboardOrden[];
+  tareasList: DashboardTarea[];
 };
 
 const numberFormatter = new Intl.NumberFormat("es-EC");
@@ -23,50 +64,44 @@ const DashboardPage = () => {
     ordenesAbiertas: 0,
     ordenesCerradas: 0,
     alertasPendientes: 0,
+    tecnicosActivos: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [vehiculosList, setVehiculosList] = useState<Record<string, unknown>[]>([]);
-  const [ordenesList, setOrdenesList] = useState<Record<string, unknown>[]>([]);
-  const [tareasList, setTareasList] = useState<Record<string, unknown>[]>([]);
-  const [usuariosList, setUsuariosList] = useState<Record<string, unknown>[]>([]);
+  const [vehiculosList, setVehiculosList] = useState<DashboardVehiculo[]>([]);
+  const [ordenesList, setOrdenesList] = useState<DashboardOrden[]>([]);
+  const [tareasList, setTareasList] = useState<DashboardTarea[]>([]);
 
   useEffect(() => {
     const fetchMetrics = async () => {
       setLoading(true);
       try {
-        const [vehiculosRes, planesRes, ordenesRes, alertasRes, tareasRes, usuariosRes] = await Promise.all([
-          api.get("/vehiculos"),
-          api.get("/planes/activos"),
-          api.get("/ordenes"),
-          api.get("/alertas/proximas", { params: { dias: 30 } }),
-          api.get("/tareas"),
-          api.get("/usuarios"),
-        ]);
+        const { data } = await api.get<DashboardSummaryResponse>("/dashboard/resumen");
+        const summary = data ?? ({} as DashboardSummaryResponse);
 
-        const vehiculos = Array.isArray(vehiculosRes.data) ? vehiculosRes.data : [];
-        const planes = Array.isArray(planesRes.data) ? planesRes.data : [];
-        const ordenes = Array.isArray(ordenesRes.data) ? ordenesRes.data : [];
-        const alertas = Array.isArray(alertasRes.data) ? alertasRes.data : [];
-        const tareas = Array.isArray(tareasRes.data) ? tareasRes.data : [];
-        const usuarios = Array.isArray(usuariosRes.data) ? usuariosRes.data : [];
-
-        const ordenesAbiertas = ordenes.filter(
-          (orden) => orden.estado === "ABIERTA" || orden.estado === "EN_PROCESO",
-        ).length;
-        const ordenesCerradas = ordenes.filter((orden) => orden.estado === "CERRADA").length;
+        const {
+          vehiculos = 0,
+          planesActivos = 0,
+          ordenesAbiertas = 0,
+          ordenesCerradas = 0,
+          alertasPendientes = 0,
+          tecnicosActivos = 0,
+          vehiculosList: vehiculosData = [],
+          ordenesList: ordenesData = [],
+          tareasList: tareasData = [],
+        } = summary;
 
         setMetrics({
-          vehiculos: vehiculos.length,
-          planes: planes.length,
+          vehiculos,
+          planes: planesActivos,
           ordenesAbiertas,
           ordenesCerradas,
-          alertasPendientes: alertas.length,
+          alertasPendientes,
+          tecnicosActivos,
         });
-        setVehiculosList(vehiculos);
-        setOrdenesList(ordenes);
-        setTareasList(tareas);
-        setUsuariosList(usuarios);
+        setVehiculosList(Array.isArray(vehiculosData) ? vehiculosData : []);
+        setOrdenesList(Array.isArray(ordenesData) ? ordenesData : []);
+        setTareasList(Array.isArray(tareasData) ? tareasData : []);
         setError(null);
       } catch (err) {
         const message = err instanceof Error ? err.message : "No se pudieron cargar los indicadores";
@@ -74,7 +109,14 @@ const DashboardPage = () => {
         setVehiculosList([]);
         setOrdenesList([]);
         setTareasList([]);
-        setUsuariosList([]);
+        setMetrics({
+          vehiculos: 0,
+          planes: 0,
+          ordenesAbiertas: 0,
+          ordenesCerradas: 0,
+          alertasPendientes: 0,
+          tecnicosActivos: 0,
+        });
       } finally {
         setLoading(false);
       }
@@ -309,18 +351,7 @@ const DashboardPage = () => {
     };
   }, [tareasList]);
 
-  const totalTecnicosActivos = useMemo(() => {
-    if (usuariosList.length === 0) {
-      return 0;
-    }
-    return usuariosList.filter(
-      (usuario) =>
-        typeof usuario.rol === "string" &&
-        usuario.rol === "TECNICO" &&
-        typeof usuario.estado === "string" &&
-        usuario.estado === "ACTIVO",
-    ).length;
-  }, [usuariosList]);
+  const totalTecnicosActivos = metrics.tecnicosActivos;
 
   const tecnicosConTareas = useMemo(() => {
     const asignados = new Set<string>();

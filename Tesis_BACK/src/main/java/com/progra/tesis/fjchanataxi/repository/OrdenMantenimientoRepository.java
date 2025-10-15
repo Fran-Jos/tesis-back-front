@@ -44,6 +44,13 @@ public interface OrdenMantenimientoRepository extends JpaRepository<OrdenManteni
 
     List<OrdenMantenimiento> findByTipoOrderByFechaAperturaDesc(com.progra.tesis.fjchanataxi.enums.TipoOrden tipo);
 
+    /**
+     * Cuenta órdenes por estado específico.
+     * @param estado estado de la orden
+     * @return cantidad de órdenes
+     */
+    long countByEstado(EstadoOrden estado);
+
     List<OrdenMantenimiento> findByResponsableIdOrderByFechaAperturaDesc(Long responsableId);
 
     List<OrdenMantenimiento> findByResponsableIdAndEstadoOrderByFechaAperturaDesc(Long responsableId, EstadoOrden estado);
