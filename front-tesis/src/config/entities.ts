@@ -7,40 +7,66 @@
  */
 import type { ReactNode } from "react";
 
+// definimos los tipos de campos soportados en formularios y tablas
 export type FieldType = "text" | "textarea" | "number" | "decimal" | "select" | "date" | "datetime" | "boolean";
 
+// opción reutilizable para selects y chips enum
 export type Option = {
   value: string | number | boolean;
   label: string;
 };
 
+
+// configuración de un campo en formularios
 export type FieldConfig = {
+  // clave del campo en el objeto JSON
   name: string;
+  // etiqueta legible
   label: string;
+    // tipo de campo
   type: FieldType;
+  // texto de ayuda
   placeholder?: string;
+    // si es obligatorio
   required?: boolean;
+    // opciones para selects
   options?: Option[];
+  // configuración para obtener opciones dinámicamente desde un endpoint y obtenemos de nuestro backend
   fetchOptions?: {
+    // endpoint REST para obtener las opciones
     endpoint: string;
+    // clave del valor en el objeto retornado
     valueKey: string;
+    // clave de la etiqueta en el objeto retornado
     labelKey: string;
+    // función opcional para transformar la etiqueta (útil para concatenar varios campos)
     transformLabel?: (item: Record<string, unknown>) => string;
   };
+  // si el campo es solo lectura
   readOnly?: boolean;
+  // si el campo es solo lectura al editar (útil para campos únicos como email o cédula)
   readOnlyOnEdit?: boolean;
+  // si el campo se oculta al crear (útil para contraseñas)
   hideOnCreate?: boolean;
+  // si el campo se oculta al editar (útil para contraseñas)
   hideOnEdit?: boolean;
+  // valor por defecto (útil para checkboxes booleanos)
   defaultValue?: string | number | boolean | null;
 };
 
+// configuración de una columna en tablas
 export type ColumnConfig = {
+  // clave del campo en el objeto JSON
   field: string;
+    // etiqueta legible
   label: string;
+    // tipo de dato (útil para formateo)
   type?: FieldType | "enum" | "datetime" | "chip";
+    // función opcional para renderizar el contenido de la celda
   render?: (value: unknown, row: Record<string, unknown>) => ReactNode;
 };
 
+// configuración de un campo en la vista de detalle (similar a ColumnConfig)
 export type DetailFieldConfig = {
   field: string;
   label: string;
@@ -48,6 +74,7 @@ export type DetailFieldConfig = {
   render?: (value: unknown, row: Record<string, unknown>) => ReactNode;
 };
 
+// configuración de un filtro en la vista de listado
 export type FilterConfig = {
   name: string;
   label: string;
@@ -63,14 +90,22 @@ export type FilterConfig = {
   required?: boolean;
 };
 
-export type HttpMethod = "post" | "put" | "patch";
+// métodos HTTP soportados para formularios
+export type HttpMethod = "post" | "put" | "patch" | "delete";
 
+// configuración completa de una entidad CRUD
 export type EntityConfig = {
+    // clave única de la entidad (usada en rutas y menús)
   key: string;
+    // endpoint base en el backend (por ejemplo /vehiculos)
   apiPath: string;
+    // etiqueta legible para menús y títulos
   label: string;
+    // descripción corta de la entidad
   description: string;
+    // campos que se buscan en la barra de búsqueda global
   searchKeys?: string[];
+    // configuración de la vista de listado
   list: {
     columns: ColumnConfig[];
     endpoint?: string | ((filters: Record<string, unknown>) => string | null);
@@ -158,6 +193,7 @@ export const entityConfigs: EntityConfig[] = [
         { field: "modelo", label: "Modelo" },
         { field: "anio", label: "Año", type: "number" },
         { field: "estado", label: "Estado", type: "enum" },
+        { field: "kmActual", label: "Kilometraje actual", type: "number" },
       ],
     },
     form: {
