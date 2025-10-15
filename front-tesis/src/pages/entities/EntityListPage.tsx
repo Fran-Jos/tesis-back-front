@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { EntityConfig, Option } from "../../config/entities";
 import api from "../../lib/api";
 import { formatValue } from "../../utils/formatters";
+import { getErrorMessage } from "../../utils/errors";
 
 type EntityListPageProps = {
   config: EntityConfig;
@@ -24,25 +25,39 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
   const [filters, setFilters] = useState<FilterState>(() => {
     const initial: FilterState = {};
     config.list.filters?.forEach((filter) => {
-      initial[filter.name] = "";
+      if (filter.defaultValue === undefined || filter.defaultValue === null) {
+        initial[filter.name] = "";
+        return;
+      }
+
+      const value = filter.defaultValue;
+      initial[filter.name] = typeof value === "string" ? value : String(value);
     });
     return initial;
   });
   const [filterOptions, setFilterOptions] = useState<Record<string, Option[]>>({});
 
-  const loadFilterOptions = async () => {
+  const isMountedRef = useRef(true);
+
+  useEffect(() => () => {
+    isMountedRef.current = false;
+  }, []);
+
+  const loadFilterOptions = useCallback(async () => {
     if (!config.list.filters) {
       return;
     }
 
-    await Promise.all(
-      config.list.filters
-        .filter((filter) => filter.type === "select" && filter.fetchOptions)
-        .map(async (filter) => {
-          const fetchOptions = filter.fetchOptions;
-          if (!fetchOptions) {
-            return;
-          }
+    const asyncFilters = config.list.filters.filter((filter) => filter.type === "select" && filter.fetchOptions);
+
+    await Promise.allSettled(
+      asyncFilters.map(async (filter) => {
+        const fetchOptions = filter.fetchOptions;
+        if (!fetchOptions) {
+          return;
+        }
+
+        try {
           const response = await api.get(fetchOptions.endpoint);
           const data = Array.isArray(response.data) ? response.data : [];
           const options = data.map((item: Record<string, unknown>) => {
@@ -55,14 +70,25 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
               label,
             } satisfies Option;
           });
-          setFilterOptions((prev) => ({ ...prev, [filter.name]: options }));
-        }),
+
+          if (isMountedRef.current) {
+            setFilterOptions((prev) => ({ ...prev, [filter.name]: options }));
+          }
+        } catch (error) {
+          console.error(`No se pudieron cargar las opciones del filtro "${filter.label}"`, error);
+        }
+      }),
     );
-  };
+  }, [config.list.filters]);
 
   useEffect(() => {
     void loadFilterOptions();
-  }, []);
+  }, [loadFilterOptions]);
+
+  const missingRequiredFilter = useMemo(
+    () => config.list.filters?.some((filter) => filter.required && !filters[filter.name]) ?? false,
+    [config.list.filters, filters],
+  );
 
   const resolvedEndpoint = useMemo(() => {
     const endpoint = config.list.endpoint;
@@ -75,29 +101,41 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     return config.apiPath;
   }, [config.apiPath, config.list.endpoint, filters]);
 
-  useEffect(() => {
-    const loadItems = async () => {
-      if (!resolvedEndpoint) {
+  const loadItems = useCallback(async () => {
+    if (!resolvedEndpoint || missingRequiredFilter) {
+      if (isMountedRef.current) {
         setFetchState({ loading: false, error: null });
         setItems([]);
-        return;
       }
+      return;
+    }
 
+    if (isMountedRef.current) {
       setFetchState({ loading: true, error: null });
-      try {
-        const response = await api.get(resolvedEndpoint);
-        const data = Array.isArray(response.data) ? (response.data as ItemRecord[]) : [];
+    }
+
+    try {
+      const response = await api.get(resolvedEndpoint);
+      const data = Array.isArray(response.data) ? (response.data as ItemRecord[]) : [];
+
+      if (isMountedRef.current) {
         setItems(data);
         setFetchState({ loading: false, error: null });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "No se pudo cargar la información";
+      }
+    } catch (error) {
+      console.error("Error al cargar registros", error);
+      const message = getErrorMessage(error, "No se pudo cargar la información. Intenta nuevamente.");
+
+      if (isMountedRef.current) {
         setFetchState({ loading: false, error: message });
         setItems([]);
       }
-    };
+    }
+  }, [missingRequiredFilter, resolvedEndpoint]);
 
+  useEffect(() => {
     void loadItems();
-  }, [resolvedEndpoint]);
+  }, [loadItems]);
 
   const filteredItems = useMemo(() => {
     if (!searchTerm || !config.searchKeys?.length) {
@@ -136,10 +174,13 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     }
   };
 
-  const missingRequiredFilter = config.list.filters?.some((filter) => filter.required && !filters[filter.name]);
   const allowView = config.actions?.allowView ?? true;
   const allowEdit = (config.actions?.allowEdit ?? true) && !config.form.disableEdit;
   const allowDelete = config.actions?.allowDelete ?? true;
+
+  const handleRetry = useCallback(() => {
+    void loadItems();
+  }, [loadItems]);
 
   return (
     <div className="space-y-8">
@@ -230,8 +271,25 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
             Cargando datos...
           </div>
         ) : fetchState.error ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {fetchState.error}
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-5 text-sm text-red-600">
+            <p className="font-semibold">No se pudo cargar la información.</p>
+            <p className="mt-1 text-red-500/80">{fetchState.error}</p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => handleRetry()}
+                className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50"
+              >
+                Reintentar
+              </button>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                Recargar página
+              </button>
+            </div>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="flex items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 py-16 text-sm text-slate-500">

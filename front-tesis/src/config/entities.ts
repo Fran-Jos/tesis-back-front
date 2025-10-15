@@ -54,6 +54,7 @@ export type FilterConfig = {
     transformLabel?: (item: Record<string, unknown>) => string;
   };
   required?: boolean;
+  defaultValue?: string | number | boolean | null;
 };
 
 export type HttpMethod = "post" | "put" | "patch";
