@@ -123,6 +123,7 @@ export type EntityConfig = {
   };
   messages?: {
     deleteConfirm?: string;
+    deleteSuccess?: string;
   };
   actions?: {
     allowDelete?: boolean;

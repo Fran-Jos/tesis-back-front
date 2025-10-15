@@ -25,6 +25,11 @@ type FetchState = {
   error: string | null;
 };
 
+type ActionFeedback = {
+  type: "success" | "error";
+  message: string;
+};
+
 const EntityListPage = ({ config }: EntityListPageProps) => {
   // Datos obtenidos desde la API correspondiente (definida en `config.apiPath`).
   const [items, setItems] = useState<ItemRecord[]>([]);
@@ -41,6 +46,7 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
   });
   // Las opciones dinámicas (como selects remotos) se cargan y guardan aquí para reuso.
   const [filterOptions, setFilterOptions] = useState<Record<string, Option[]>>({});
+  const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
 
   const loadFilterOptions = async () => {
     if (!config.list.filters) {
@@ -167,9 +173,13 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     try {
       await api.delete(`${config.apiPath}/${item.id}`);
       setItems((prev) => prev.filter((current) => current.id !== item.id));
+      setActionFeedback({
+        type: "success",
+        message: config.messages?.deleteSuccess ?? "El registro se eliminó correctamente.",
+      });
     } catch (error) {
       const message = resolveErrorMessage(error, "No se pudo eliminar el registro");
-      alert(message);
+      setActionFeedback({ type: "error", message });
     }
   };
 
@@ -196,6 +206,17 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
       </header>
 
       <div className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl">
+        {actionFeedback ? (
+          <div
+            className={`rounded-2xl border px-4 py-3 text-sm ${
+              actionFeedback.type === "success"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border-red-200 bg-red-50 text-red-600"
+            }`}
+          >
+            {actionFeedback.message}
+          </div>
+        ) : null}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <label className="text-sm font-medium text-slate-600" htmlFor="search">
