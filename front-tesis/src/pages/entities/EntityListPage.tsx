@@ -111,24 +111,50 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     return config.apiPath;
   }, [config.apiPath, config.list.endpoint, filters]);
 
+  const sanitizeMessage = (rawMessage: string) => {
+    const trimmed = rawMessage.trim();
+    if (!trimmed) {
+      return trimmed;
+    }
+
+    const removeTrailingBrackets = (value: string) => value.replace(/]+$/u, "").trim();
+
+    const reglaNegocioToken = "ReglaNegocioException:";
+    if (trimmed.includes(reglaNegocioToken)) {
+      return removeTrailingBrackets(
+        trimmed.slice(trimmed.lastIndexOf(reglaNegocioToken) + reglaNegocioToken.length).trim(),
+      );
+    }
+
+    const lastColonIndex = trimmed.lastIndexOf(":");
+    if (lastColonIndex !== -1 && lastColonIndex < trimmed.length - 1) {
+      const candidate = removeTrailingBrackets(trimmed.slice(lastColonIndex + 1).trim());
+      if (candidate) {
+        return candidate;
+      }
+    }
+
+    return removeTrailingBrackets(trimmed);
+  };
+
   const resolveErrorMessage = (error: unknown, fallback: string) => {
     if (axios.isAxiosError(error)) {
       const data = error.response?.data;
       if (typeof data === "string" && data.trim().length > 0) {
-        return data;
+        return sanitizeMessage(data);
       }
       if (data && typeof data === "object" && "message" in data) {
         const message = (data as { message?: unknown }).message;
         if (typeof message === "string" && message.trim().length > 0) {
-          return message;
+          return sanitizeMessage(message);
         }
       }
       if (typeof error.message === "string" && error.message.trim().length > 0) {
-        return error.message;
+        return sanitizeMessage(error.message);
       }
     }
     if (error instanceof Error && error.message.trim().length > 0) {
-      return error.message;
+      return sanitizeMessage(error.message);
     }
     return fallback;
   };
