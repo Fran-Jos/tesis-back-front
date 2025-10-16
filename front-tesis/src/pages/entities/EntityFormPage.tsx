@@ -73,6 +73,24 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [optionsState, setOptionsState] = useState<OptionsState>({});
+  const [dialogMessage, setDialogMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!dialogMessage) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setDialogMessage(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [dialogMessage]);
 
   const visibleFields = useMemo(
     () =>
@@ -147,7 +165,9 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
         });
         setError(null);
       } catch (err) {
-        setError(resolveErrorMessage(err, "No se pudo cargar el registro"));
+        const message = resolveErrorMessage(err, "No se pudo cargar el registro");
+        setError(message);
+        setDialogMessage(message);
       } finally {
         setLoading(false);
       }
@@ -202,7 +222,9 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
       await request(endpoint, payload);
       navigate(`/app/${config.key}`);
     } catch (err) {
-      setError(resolveErrorMessage(err, "No se pudo guardar la información"));
+      const message = resolveErrorMessage(err, "No se pudo guardar la información");
+      setError(message);
+      setDialogMessage(message);
     } finally {
       setSaving(false);
     }
@@ -358,6 +380,30 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
           </button>
         </div>
       </form>
+      {dialogMessage ? (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/50 px-4"
+          onClick={() => setDialogMessage(null)}
+        >
+          <div
+            className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{dialogMessage}</div>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDialogMessage(null)}
+                className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-700"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
