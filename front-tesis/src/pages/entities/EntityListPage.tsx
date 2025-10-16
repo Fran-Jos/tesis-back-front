@@ -11,6 +11,7 @@ import axios from "axios";
 import type { EntityConfig, Option } from "../../config/entities";
 import api from "../../lib/api";
 import { formatValue } from "../../utils/formatters";
+import FeedbackModal from "../../components/ui/FeedbackModal";
 
 type EntityListPageProps = {
   config: EntityConfig;
@@ -48,23 +49,6 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
   const [filterOptions, setFilterOptions] = useState<Record<string, Option[]>>({});
   const [inlineFeedback, setInlineFeedback] = useState<ActionFeedback | null>(null);
   const [dialogFeedback, setDialogFeedback] = useState<ActionFeedback | null>(null);
-
-  useEffect(() => {
-    if (!dialogFeedback) {
-      return undefined;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setDialogFeedback(null);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [dialogFeedback]);
 
   const loadFilterOptions = async () => {
     if (!config.list.filters) {
@@ -400,47 +384,7 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
           </div>
         )}
       </div>
-      {dialogFeedback ? (
-        <div
-          role="alertdialog"
-          aria-modal="true"
-          className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/50 px-4"
-          onClick={() => setDialogFeedback(null)}
-        >
-          <div
-            className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div
-              className={`rounded-2xl border px-4 py-3 text-sm ${
-                dialogFeedback.type === "success"
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                  : "border-red-200 bg-red-50 text-red-600"
-              }`}
-            >
-              {dialogFeedback.message}
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setDialogFeedback(null)}
-                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
-              >
-                Cerrar
-              </button>
-              {dialogFeedback.type === "error" ? (
-                <button
-                  type="button"
-                  onClick={() => setDialogFeedback(null)}
-                  className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-700"
-                >
-                  Continuar
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <FeedbackModal feedback={dialogFeedback} onClose={() => setDialogFeedback(null)} />
     </div>
   );
 };
