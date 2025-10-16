@@ -191,11 +191,11 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     try {
       await api.delete(`${config.apiPath}/${item.id}`);
       setItems((prev) => prev.filter((current) => current.id !== item.id));
-      setInlineFeedback({
+      setInlineFeedback(null);
+      setDialogFeedback({
         type: "success",
-        message: config.messages?.deleteSuccess ?? "El registro se eliminó correctamente.",
+        message: config.messages?.deleteSuccess ?? "Recurso eliminado con éxito.",
       });
-      setDialogFeedback(null);
     } catch (error) {
       const message = resolveErrorMessage(error, "No se pudo eliminar el registro");
       setInlineFeedback(null);
@@ -394,14 +394,23 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
             >
               {dialogFeedback.message}
             </div>
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setDialogFeedback(null)}
-                className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-700"
+                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
               >
-                Entendido
+                Cerrar
               </button>
+              {dialogFeedback.type === "error" ? (
+                <button
+                  type="button"
+                  onClick={() => setDialogFeedback(null)}
+                  className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-700"
+                >
+                  Continuar
+                </button>
+              ) : null}
             </div>
           </div>
         </div>
