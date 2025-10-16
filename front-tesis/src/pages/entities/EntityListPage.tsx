@@ -46,7 +46,25 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
   });
   // Las opciones dinámicas (como selects remotos) se cargan y guardan aquí para reuso.
   const [filterOptions, setFilterOptions] = useState<Record<string, Option[]>>({});
-  const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
+  const [inlineFeedback, setInlineFeedback] = useState<ActionFeedback | null>(null);
+  const [dialogFeedback, setDialogFeedback] = useState<ActionFeedback | null>(null);
+
+  useEffect(() => {
+    if (!dialogFeedback) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setDialogFeedback(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [dialogFeedback]);
 
   const loadFilterOptions = async () => {
     if (!config.list.filters) {
@@ -173,13 +191,15 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
     try {
       await api.delete(`${config.apiPath}/${item.id}`);
       setItems((prev) => prev.filter((current) => current.id !== item.id));
-      setActionFeedback({
+      setInlineFeedback({
         type: "success",
         message: config.messages?.deleteSuccess ?? "El registro se eliminó correctamente.",
       });
+      setDialogFeedback(null);
     } catch (error) {
       const message = resolveErrorMessage(error, "No se pudo eliminar el registro");
-      setActionFeedback({ type: "error", message });
+      setInlineFeedback(null);
+      setDialogFeedback({ type: "error", message });
     }
   };
 
@@ -206,15 +226,15 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
       </header>
 
       <div className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl">
-        {actionFeedback ? (
+        {inlineFeedback ? (
           <div
             className={`rounded-2xl border px-4 py-3 text-sm ${
-              actionFeedback.type === "success"
+              inlineFeedback.type === "success"
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : "border-red-200 bg-red-50 text-red-600"
             }`}
           >
-            {actionFeedback.message}
+            {inlineFeedback.message}
           </div>
         ) : null}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -354,6 +374,38 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
           </div>
         )}
       </div>
+      {dialogFeedback ? (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/50 px-4"
+          onClick={() => setDialogFeedback(null)}
+        >
+          <div
+            className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div
+              className={`rounded-2xl border px-4 py-3 text-sm ${
+                dialogFeedback.type === "success"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-red-200 bg-red-50 text-red-600"
+              }`}
+            >
+              {dialogFeedback.message}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDialogFeedback(null)}
+                className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-700"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
