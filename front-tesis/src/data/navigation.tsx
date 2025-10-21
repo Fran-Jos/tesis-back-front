@@ -102,7 +102,7 @@ const entityIconMap: Record<string, IconComponent> = {
 // Entradas principales que verá el usuario autenticado en el sidebar.
 const mainNavigation: NavigationLink[] = [
   { name: "Dashboard", to: "/app/dashboard", icon: DashboardIcon },
-  { name: "Reportes", to: "/app/reportes/detallado", icon: ChartIcon },
+  { name: "Reportes", to: "/app/reportes", icon: ChartIcon },
   ...entityConfigs.map((entity) => ({
     name: entity.label,
     to: `/app/${entity.key}`,

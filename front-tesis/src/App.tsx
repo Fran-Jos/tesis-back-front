@@ -19,6 +19,8 @@ import EntityListPage from "./pages/entities/EntityListPage";
 import EntityFormPage from "./pages/entities/EntityFormPage";
 import EntityDetailPage from "./pages/entities/EntityDetailPage";
 import MantenimientoDetalladoReportPage from "./pages/reports/MantenimientoDetalladoReportPage";
+import InformeTecnicoVehiculoPage from "./pages/reports/InformeTecnicoVehiculoPage";
+import ReportsLayout from "./pages/reports/ReportsLayout";
 
 // Definimos el componente de aplicación que envuelve toda la jerarquía visual.
 const App = () => {
@@ -68,9 +70,11 @@ const App = () => {
                   ) : null}
                 </Route>
               ))}
-              <Route path="reportes" element={<Outlet />}>
+              <Route path="reportes" element={<ReportsLayout />}>
                 {/** Reporte detallado de mantenimiento, alimentado por consultas específicas al backend. */}
                 <Route path="detallado" element={<MantenimientoDetalladoReportPage />} />
+                {/** Informe técnico por placa que consolida información del vehículo. */}
+                <Route path="informe-tecnico" element={<InformeTecnicoVehiculoPage />} />
                 {/** Redirección por defecto al reporte detallado cuando se ingresa al módulo de reportes. */}
                 <Route index element={<Navigate to="detallado" replace />} />
               </Route>

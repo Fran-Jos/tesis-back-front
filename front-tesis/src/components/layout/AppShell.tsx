@@ -45,6 +45,12 @@ const AppShell = () => {
           subtitle: "Analiza tareas, repuestos y totales por orden",
         };
       }
+      if (segments[2] === "informe-tecnico") {
+        return {
+          title: "Informe técnico del vehículo",
+          subtitle: "Consulta la ficha consolidada de mantenimiento por placa",
+        };
+      }
       return { title: "Reportes", subtitle: "Visualiza la información histórica del mantenimiento" };
     }
 

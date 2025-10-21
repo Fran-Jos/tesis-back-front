@@ -1,5 +1,6 @@
 package com.progra.tesis.fjchanataxi.service;
 
+import com.progra.tesis.fjchanataxi.dto.InformeTecnicoVehiculoDTO;
 import com.progra.tesis.fjchanataxi.dto.VehiculoDTO;
 
 import com.progra.tesis.fjchanataxi.enums.EstadoVehiculo;
@@ -22,4 +23,7 @@ public interface VehiculoService {
     List<VehiculoDTO> buscarPorRangoAnio(Integer desde, Integer hasta);
     List<VehiculoDTO> buscarPorEstado(EstadoVehiculo estado);
     List<VehiculoDTO> buscarTextoLibre(String q);
+
+    InformeTecnicoVehiculoDTO generarInformeTecnicoPorPlaca(String placa);
+    byte[] generarInformeTecnicoPdfPorPlaca(String placa);
 }

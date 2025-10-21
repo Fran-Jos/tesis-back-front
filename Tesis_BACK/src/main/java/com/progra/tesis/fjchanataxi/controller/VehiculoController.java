@@ -1,11 +1,15 @@
 package com.progra.tesis.fjchanataxi.controller;
 
+import com.progra.tesis.fjchanataxi.dto.InformeTecnicoVehiculoDTO;
 import com.progra.tesis.fjchanataxi.dto.VehiculoDTO;
 import com.progra.tesis.fjchanataxi.enums.EstadoVehiculo;
 import com.progra.tesis.fjchanataxi.service.VehiculoService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -106,5 +110,28 @@ public class VehiculoController {
     @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
     public ResponseEntity<List<VehiculoDTO>> busquedaLibre(@RequestParam("q") String query) {
         return ResponseEntity.ok(vehiculoService.buscarTextoLibre(query));
+    }
+
+    @GetMapping("/informe-tecnico/{placa}")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    public ResponseEntity<InformeTecnicoVehiculoDTO> informeTecnicoPorPlaca(@PathVariable String placa) {
+        return ResponseEntity.ok(vehiculoService.generarInformeTecnicoPorPlaca(placa));
+    }
+
+    @GetMapping(value = "/informe-tecnico/{placa}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    public ResponseEntity<byte[]> informeTecnicoPdf(@PathVariable String placa) {
+        byte[] pdf = vehiculoService.generarInformeTecnicoPdfPorPlaca(placa);
+        String safePlaca = placa == null ? "vehiculo" : placa.replaceAll("[^A-Za-z0-9]+", "_").toUpperCase();
+        if (safePlaca.isBlank()) {
+            safePlaca = "vehiculo";
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment()
+                .filename("informe_tecnico_" + safePlaca + ".pdf")
+                .build());
+        headers.setCacheControl(CacheControl.noCache().getHeaderValue());
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
 }
