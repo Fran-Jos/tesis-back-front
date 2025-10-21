@@ -235,7 +235,7 @@ const Topbar = ({
           <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-2 py-1.5 shadow-sm">
             <img
               alt={userName ?? "Usuario"}
-              src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=facearea&facepad=2&w=80&h=80&q=80"
+              src="/images/logo/logo-icon.svg"
               className="size-10 rounded-xl object-cover"
             />
             <div className="hidden text-left sm:block">

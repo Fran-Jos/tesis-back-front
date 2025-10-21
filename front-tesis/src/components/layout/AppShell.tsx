@@ -152,14 +152,8 @@ const AppShell = () => {
             </div>
           ) : null}
 
-          <div className="mt-auto rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-indigo-50/60 to-white p-4 shadow-lg">
-            <p className="text-sm font-semibold text-slate-900">Seamless Collaboration</p>
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Invite your team to accelerate insights, manage deliverables, and automate workflows.
-            </p>
-            <button className="mt-4 w-full rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-slate-700">
-              Invite teammates
-            </button>
+          <div className="mt-auto" aria-hidden="true">
+            {/* Espacio flexible reservado para futuras tarjetas promocionales o mensajes contextuales. */}
           </div>
         </nav>
       </aside>

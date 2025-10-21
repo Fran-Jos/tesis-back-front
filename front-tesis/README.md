@@ -17,6 +17,7 @@ Ajusta la URL al host/puerto donde esté desplegado el backend.
 
 ```bash
 npm install           # Instala dependencias
+npm install axios     # Instala Axios si la dependencia se elimina por accidente
 npm run dev           # Levanta el entorno de desarrollo (puerto 5173 por defecto)
 npm run build         # Genera la build de producción
 npm run preview       # Sirve la build generada
