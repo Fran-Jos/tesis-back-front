@@ -179,6 +179,55 @@ export const enumOptions = {
   ],
 };
 
+const humanizeEnum = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+export type EstadoAlertaVisualConfig = {
+  badge: string;
+  dot: string;
+  row?: string;
+  text?: string;
+};
+
+export const defaultEstadoAlertaStyles: EstadoAlertaVisualConfig = {
+  badge: "border-slate-200 bg-slate-100 text-slate-600",
+  dot: "bg-slate-400",
+};
+
+export const estadoAlertaStyleMap: Record<string, EstadoAlertaVisualConfig> = {
+  PENDIENTE: {
+    badge: "border-amber-200 bg-amber-50 text-amber-700",
+    dot: "bg-amber-500",
+  },
+  ATENDIDA: {
+    badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    dot: "bg-emerald-500",
+    row: "bg-emerald-50/70",
+    text: "text-slate-600",
+  },
+  CANCELADA: {
+    badge: "border-rose-200 bg-rose-50 text-rose-700",
+    dot: "bg-rose-500",
+    row: "bg-rose-50/70",
+    text: "text-rose-700",
+  },
+};
+
+export const getEstadoAlertaLabel = (value: unknown) => {
+  if (value === null || value === undefined) {
+    return "-";
+  }
+  const stringValue = String(value);
+  const option = enumOptions.estadoAlerta.find((estado) => String(estado.value) === stringValue);
+  if (option) {
+    return option.label;
+  }
+  return humanizeEnum(stringValue);
+};
+
 // Conjunto de entidades expuestas en el menú principal. Cada entrada define el endpoint REST (`apiPath`).
 export const entityConfigs: EntityConfig[] = [
   {
@@ -642,13 +691,32 @@ export const entityConfigs: EntityConfig[] = [
     description: "Monitorea las alertas preventivas y correctivas.",
     searchKeys: ["vehiculoPlaca", "mensaje", "tipo"],
     list: {
-      columns: [
-        { field: "vehiculoPlaca", label: "Vehículo" },
-        { field: "tipo", label: "Tipo", type: "enum" },
-        { field: "clasificacion", label: "Clasificación", type: "enum" },
-        { field: "estado", label: "Estado", type: "enum" },
-        { field: "fechaProgramada", label: "Fecha objetivo", type: "date" },
-      ],
+        columns: [
+          { field: "vehiculoPlaca", label: "Vehículo" },
+          { field: "tipo", label: "Tipo", type: "enum" },
+          { field: "clasificacion", label: "Clasificación", type: "enum" },
+          {
+            field: "estado",
+            label: "Estado",
+            type: "enum",
+            render: (value) => {
+              if (!value) {
+                return "-";
+              }
+              const estado = String(value);
+              const styles = estadoAlertaStyleMap[estado] ?? defaultEstadoAlertaStyles;
+              return (
+                <span
+                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${styles.badge}`}
+                >
+                  <span className={`h-2 w-2 rounded-full ${styles.dot}`} aria-hidden="true" />
+                  {getEstadoAlertaLabel(estado)}
+                </span>
+              );
+            },
+          },
+          { field: "fechaProgramada", label: "Fecha objetivo", type: "date" },
+        ],
       filters: [
         {
           name: "vehiculoId",

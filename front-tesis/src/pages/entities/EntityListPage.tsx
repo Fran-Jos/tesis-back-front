@@ -5,10 +5,17 @@
  * permisos. El componente se encarga de consultar el endpoint indicado,
  * renderizar la tabla y gestionar acciones CRUD básicas.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import type { EntityConfig, Option } from "../../config/entities";
+import {
+  defaultEstadoAlertaStyles,
+  estadoAlertaStyleMap,
+  getEstadoAlertaLabel,
+  type EntityConfig,
+  type Option,
+} from "../../config/entities";
 import api from "../../lib/api";
 import { formatValue } from "../../utils/formatters";
 
@@ -48,6 +55,45 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
   const [filterOptions, setFilterOptions] = useState<Record<string, Option[]>>({});
   const [inlineFeedback, setInlineFeedback] = useState<ActionFeedback | null>(null);
   const [dialogFeedback, setDialogFeedback] = useState<ActionFeedback | null>(null);
+  const isAlertEntity = config.key === "alertas";
+  const [selectedAlert, setSelectedAlert] = useState<ItemRecord | null>(null);
+  const [alertActionState, setAlertActionState] = useState<{ loading: boolean; error: string | null }>({
+    loading: false,
+    error: null,
+  });
+  const selectedAlertEstado =
+    selectedAlert && typeof selectedAlert.estado === "string" ? selectedAlert.estado : null;
+  const selectedAlertStyles =
+    selectedAlertEstado && estadoAlertaStyleMap[selectedAlertEstado]
+      ? estadoAlertaStyleMap[selectedAlertEstado]
+      : defaultEstadoAlertaStyles;
+  const selectedAlertEstadoLabel = selectedAlertEstado ? getEstadoAlertaLabel(selectedAlertEstado) : "-";
+  const selectedAlertMessage =
+    selectedAlert && typeof selectedAlert.mensaje === "string" && selectedAlert.mensaje.trim().length > 0
+      ? selectedAlert.mensaje.trim()
+      : null;
+
+  const closeAlertModal = useCallback(() => {
+    if (alertActionState.loading) {
+      return;
+    }
+    setSelectedAlert(null);
+    setAlertActionState({ loading: false, error: null });
+  }, [alertActionState.loading]);
+
+  const handleAlertClick = (item: ItemRecord) => {
+    if (!isAlertEntity) {
+      return;
+    }
+    setSelectedAlert(item);
+    setAlertActionState({ loading: false, error: null });
+  };
+
+  const handleActionClick = (event: ReactMouseEvent<HTMLElement>) => {
+    if (isAlertEntity) {
+      event.stopPropagation();
+    }
+  };
 
   useEffect(() => {
     if (!dialogFeedback) {
@@ -65,6 +111,28 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [dialogFeedback]);
+
+  useEffect(() => {
+    if (!isAlertEntity || !selectedAlert) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeAlertModal();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [closeAlertModal, isAlertEntity, selectedAlert]);
+
+  useEffect(() => {
+    setSelectedAlert(null);
+    setAlertActionState({ loading: false, error: null });
+  }, [config.key]);
 
   const loadFilterOptions = async () => {
     if (!config.list.filters) {
@@ -131,6 +199,40 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
       return error.message;
     }
     return fallback;
+  };
+
+  const handleMarkAlertAsAttended = async () => {
+    if (!selectedAlert?.id) {
+      return;
+    }
+
+    setAlertActionState({ loading: true, error: null });
+
+    try {
+      const response = await api.patch(`${config.apiPath}/${selectedAlert.id}`, {
+        estado: "ATENDIDA",
+      });
+      const updatedAlert = (response?.data ?? {}) as ItemRecord;
+      const updatedAlertId = (updatedAlert.id ?? selectedAlert.id) as number | undefined;
+
+      if (updatedAlertId !== undefined) {
+        setItems((prev) =>
+          prev.map((current) =>
+            current.id === updatedAlertId ? { ...current, ...updatedAlert, id: updatedAlertId } : current,
+          ),
+        );
+      }
+
+      setInlineFeedback({
+        type: "success",
+        message: "La alerta se marcó como atendida correctamente.",
+      });
+      setAlertActionState({ loading: false, error: null });
+      setSelectedAlert(null);
+    } catch (error) {
+      const message = resolveErrorMessage(error, "No se pudo actualizar la alerta");
+      setAlertActionState({ loading: false, error: message });
+    }
   };
 
   // Consulta el listado cada vez que cambia el endpoint (por filtros dinámicos, etc.).
@@ -329,51 +431,199 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
-                {filteredItems.map((item) => (
-                  <tr key={item.id ?? crypto.randomUUID()} className="transition hover:bg-slate-50/70">
-                    {config.list.columns.map((column) => (
-                      <td key={column.field} className="px-4 py-3 align-top">
-                        {column.render
-                          ? column.render(item[column.field], item)
-                          : formatValue(item[column.field], column.type)}
+                {filteredItems.map((item) => {
+                  const estado = typeof item.estado === "string" ? item.estado : null;
+                  const estadoStyles =
+                    isAlertEntity && estado
+                      ? estadoAlertaStyleMap[estado] ?? defaultEstadoAlertaStyles
+                      : undefined;
+                  const rowClassName = [
+                    "transition hover:bg-slate-50/70",
+                    isAlertEntity ? "cursor-pointer" : "",
+                    estadoStyles?.row ?? "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ");
+                  const cellTextClass = estadoStyles?.text ?? "";
+
+                  return (
+                    <tr
+                      key={item.id ?? crypto.randomUUID()}
+                      className={rowClassName || "transition hover:bg-slate-50/70"}
+                      onClick={isAlertEntity ? () => handleAlertClick(item) : undefined}
+                      role={isAlertEntity ? "button" : undefined}
+                      tabIndex={isAlertEntity ? 0 : undefined}
+                      onKeyDown={
+                        isAlertEntity
+                          ? (event: ReactKeyboardEvent<HTMLTableRowElement>) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                handleAlertClick(item);
+                              }
+                            }
+                          : undefined
+                      }
+                    >
+                      {config.list.columns.map((column) => (
+                        <td
+                          key={column.field}
+                          className={`px-4 py-3 align-top${cellTextClass ? ` ${cellTextClass}` : ""}`}
+                        >
+                          {column.render
+                            ? column.render(item[column.field], item)
+                            : formatValue(item[column.field], column.type)}
+                        </td>
+                      ))}
+                      <td className={`px-4 py-3${cellTextClass ? ` ${cellTextClass}` : ""}`}>
+                        <div className="flex flex-wrap gap-2">
+                          {allowView && item.id ? (
+                            <Link
+                              to={`/app/${config.key}/${item.id}`}
+                              className="rounded-xl border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-200 hover:text-indigo-500"
+                              onClick={isAlertEntity ? handleActionClick : undefined}
+                            >
+                              Ver
+                            </Link>
+                          ) : null}
+                          {allowEdit && item.id ? (
+                            <Link
+                              to={`/app/${config.key}/${item.id}/editar`}
+                              className="rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-100"
+                              onClick={isAlertEntity ? handleActionClick : undefined}
+                            >
+                              Editar
+                            </Link>
+                          ) : null}
+                          {allowDelete && item.id ? (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                if (isAlertEntity) {
+                                  event.stopPropagation();
+                                }
+                                void handleDelete(item);
+                              }}
+                              className="rounded-xl border border-red-100 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+                            >
+                              Eliminar
+                            </button>
+                          ) : null}
+                        </div>
                       </td>
-                    ))}
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-2">
-                        {allowView && item.id ? (
-                          <Link
-                            to={`/app/${config.key}/${item.id}`}
-                            className="rounded-xl border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-200 hover:text-indigo-500"
-                          >
-                            Ver
-                          </Link>
-                        ) : null}
-                        {allowEdit && item.id ? (
-                          <Link
-                            to={`/app/${config.key}/${item.id}/editar`}
-                            className="rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-100"
-                          >
-                            Editar
-                          </Link>
-                        ) : null}
-                        {allowDelete && item.id ? (
-                          <button
-                            type="button"
-                            onClick={() => void handleDelete(item)}
-                            className="rounded-xl border border-red-100 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-100"
-                          >
-                            Eliminar
-                          </button>
-                        ) : null}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </div>
+      {isAlertEntity && selectedAlert ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="alerta-detalle-titulo"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4"
+          onClick={closeAlertModal}
+        >
+          <div
+            className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-indigo-500">Detalle de alerta</p>
+                <h2 id="alerta-detalle-titulo" className="mt-1 text-xl font-semibold text-slate-900">
+                  {selectedAlert.vehiculoPlaca ?? "Alerta"}
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  {selectedAlert.planNombre ? `Plan asociado: ${selectedAlert.planNombre}` : "Sin plan asociado"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeAlertModal}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-lg font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Cerrar detalle de alerta"
+                disabled={alertActionState.loading}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="mt-4">
+              <span
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${selectedAlertStyles.badge}`}
+              >
+                <span className={`h-2 w-2 rounded-full ${selectedAlertStyles.dot}`} aria-hidden="true" />
+                {selectedAlertEstadoLabel}
+              </span>
+            </div>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Fecha objetivo</p>
+                <p className="mt-1 text-sm font-medium text-slate-900">
+                  {formatValue(selectedAlert.fechaProgramada, "date")}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Tipo</p>
+                <p className="mt-1 text-sm text-slate-600">{formatValue(selectedAlert.tipo, "enum")}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Clasificación</p>
+                <p className="mt-1 text-sm text-slate-600">{formatValue(selectedAlert.clasificacion, "enum")}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Plan</p>
+                <p className="mt-1 text-sm text-slate-600">
+                  {selectedAlert.planNombre ?? "Sin plan asociado"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Orden asociada</p>
+                <p className="mt-1 text-sm text-slate-600">
+                  {selectedAlert.ordenAtendidaId ? `#${selectedAlert.ordenAtendidaId}` : "Sin orden vinculada"}
+                </p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Descripción</p>
+              <p className="mt-2 whitespace-pre-line text-sm text-slate-600">
+                {selectedAlertMessage ?? "Sin detalles adicionales."}
+              </p>
+            </div>
+            {alertActionState.error ? (
+              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                {alertActionState.error}
+              </div>
+            ) : null}
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={closeAlertModal}
+                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={alertActionState.loading}
+              >
+                Cerrar
+              </button>
+              {selectedAlertEstado !== "ATENDIDA" ? (
+                <button
+                  type="button"
+                  onClick={() => void handleMarkAlertAsAttended()}
+                  className="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={alertActionState.loading}
+                >
+                  {alertActionState.loading ? "Actualizando..." : "Marcar como atendida"}
+                </button>
+              ) : (
+                <div className="inline-flex items-center rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-600">
+                  Procesada
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
       {dialogFeedback ? (
         <div
           role="alertdialog"
