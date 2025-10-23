@@ -8,11 +8,12 @@
  */
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import api from "../lib/api"; // Cliente Axios parametrizado con encabezados y base URL.
+import type { UserRole } from "../types/auth";
 
 type AuthUser = {
   usuarioId: number;
   nombreCompleto: string;
-  rol: string;
+  rol: UserRole;
 };
 
 type AuthContextValue = {
@@ -56,7 +57,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const login = useCallback(async (credentials: { email: string; password: string }) => {
     // Enviamos las credenciales al backend; se espera un token y datos básicos de identidad.
     const response = await api.post("/auth/login", credentials);
-    const payload = response.data as { token: string; usuarioId: number; nombreCompleto: string; rol: string };
+    const payload = response.data as {
+      token: string;
+      usuarioId: number;
+      nombreCompleto: string;
+      rol: UserRole;
+    };
     // Persistimos la sesión localmente para que sobreviva a recargas.
     localStorage.setItem(STORAGE_TOKEN_KEY, payload.token);
     localStorage.setItem(

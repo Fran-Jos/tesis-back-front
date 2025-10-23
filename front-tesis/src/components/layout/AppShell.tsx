@@ -10,7 +10,7 @@
 import { useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import clsx from "clsx";
-import navigationItems from "../../data/navigation"; // Menú principal configurado en un archivo de datos.
+import { getNavigationItems } from "../../data/navigation"; // Menú principal configurado en un archivo de datos.
 import Topbar from "./Topbar"; // Barra superior reutilizable con acciones de usuario.
 import useAuth from "../../hooks/useAuth"; // Hook que expone identidad y logout.
 import { entityConfigMap } from "../../config/entities"; // Mapa para traducir la URL a metadatos descriptivos.
@@ -22,6 +22,7 @@ const AppShell = () => {
   const { user, logout } = useAuth();
   // `useLocation` nos da la ruta actual para sincronizar la UI con la navegación.
   const location = useLocation();
+  const navigationItems = useMemo(() => getNavigationItems(user?.rol), [user?.rol]);
 
   // Derivamos títulos dinámicos en función de la ruta. Esto mantiene una UX consistente.
   const { title, subtitle } = useMemo(() => {

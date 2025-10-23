@@ -7,6 +7,11 @@
  */
 import type { ComponentType } from "react";
 import { entityConfigs } from "../config/entities";
+import type { UserRole } from "../types/auth";
+
+type RoleAwareNavigationLink = {
+  allowedRoles?: UserRole[];
+};
 
 type IconComponent = ComponentType<{ className?: string }>;
 
@@ -14,7 +19,7 @@ type NavigationLink = {
   name: string;
   to: string;
   icon: IconComponent;
-};
+} & RoleAwareNavigationLink;
 
 type NavigationItem = {
   name: string;
@@ -100,23 +105,39 @@ const entityIconMap: Record<string, IconComponent> = {
 };
 
 // Entradas principales que verá el usuario autenticado en el sidebar.
+const entityRoleMap: Record<string, UserRole[]> = {
+  vehiculos: ["ADMIN"],
+  usuarios: ["ADMIN"],
+  planes: ["ADMIN", "TECNICO"],
+  ordenes: ["ADMIN", "TECNICO"],
+  tareas: ["ADMIN", "TECNICO"],
+  "repuestos-usados": ["ADMIN", "TECNICO"],
+  registrokm: ["ADMIN", "TECNICO", "OPERADOR"],
+  alertas: ["ADMIN", "OPERADOR"],
+};
+
 const mainNavigation: NavigationLink[] = [
-  { name: "Dashboard", to: "/app/dashboard", icon: DashboardIcon },
-  { name: "Reportes", to: "/app/reportes/detallado", icon: ChartIcon },
+  { name: "Dashboard", to: "/app/dashboard", icon: DashboardIcon, allowedRoles: ["ADMIN", "TECNICO"] },
+  { name: "Reportes", to: "/app/reportes/detallado", icon: ChartIcon, allowedRoles: ["ADMIN"] },
   ...entityConfigs.map((entity) => ({
     name: entity.label,
     to: `/app/${entity.key}`,
     icon: entityIconMap[entity.key] ?? DashboardIcon,
+    allowedRoles: entityRoleMap[entity.key] ?? ["ADMIN"],
   })),
 ];
 
 // Exportamos la estructura final que consume `AppShell` para renderizar enlaces.
-const navigationItems: {
-  main: NavigationLink[];
-  secondary: NavigationItem[];
-} = {
-  main: mainNavigation,
-  secondary: [],
+const filterByRole = <T extends RoleAwareNavigationLink>(items: T[], role?: UserRole | null) => {
+  if (!role) {
+    return items;
+  }
+  return items.filter((item) => !item.allowedRoles || item.allowedRoles.includes(role));
 };
 
-export default navigationItems;
+export const getNavigationItems = (role?: UserRole | null) => ({
+  main: filterByRole(mainNavigation, role),
+  secondary: [] as NavigationItem[],
+});
+
+export type { NavigationLink };

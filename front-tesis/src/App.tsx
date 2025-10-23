@@ -11,6 +11,7 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import AppShell from "./components/layout/AppShell";
 import PrivateRoute from "./components/routing/PrivateRoute";
+import AppIndexRedirect from "./components/routing/AppIndexRedirect";
 import { AuthProvider } from "./context/AuthContext";
 import { entityConfigs } from "./config/entities";
 import DashboardPage from "./pages/DashboardPage";
@@ -74,13 +75,13 @@ const App = () => {
                 {/** Redirección por defecto al reporte detallado cuando se ingresa al módulo de reportes. */}
                 <Route index element={<Navigate to="detallado" replace />} />
               </Route>
-              {/** Cuando se visita /app sin subruta se redirige al dashboard. */}
-              <Route index element={<Navigate to="dashboard" replace />} />
+              {/** Cuando se visita /app sin subruta se redirige según el rol del usuario. */}
+              <Route index element={<AppIndexRedirect />} />
             </Route>
           </Route>
-          {/** Redirecciones globales para llevar siempre al dashboard autenticado. */}
-          <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+          {/** Redirecciones globales hacia el contenedor principal, el rol decide el destino final. */}
+          <Route path="/" element={<Navigate to="/app" replace />} />
+          <Route path="*" element={<Navigate to="/app" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
