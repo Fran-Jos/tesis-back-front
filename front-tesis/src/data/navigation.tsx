@@ -113,7 +113,7 @@ const entityRoleMap: Record<string, UserRole[]> = {
   tareas: ["ADMIN", "TECNICO"],
   "repuestos-usados": ["ADMIN", "TECNICO"],
   registrokm: ["ADMIN", "TECNICO", "OPERADOR"],
-  alertas: ["ADMIN", "OPERADOR"],
+  alertas: ["ADMIN", "OPERADOR", "TECNICO"],
 };
 
 const mainNavigation: NavigationLink[] = [

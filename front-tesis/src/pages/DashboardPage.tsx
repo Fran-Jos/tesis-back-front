@@ -6,12 +6,14 @@
  * cómo se normalizan los datos y de qué endpoint proviene cada sección.
  */
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AreaTrendChart from "../components/charts/AreaTrendChart";
 import BarComparisonChart from "../components/charts/BarComparisonChart";
 import GoalRadialChart from "../components/charts/GoalRadialChart";
 import PieDistributionChart from "../components/charts/PieDistributionChart";
 import MetricCard from "../components/ui/MetricCard";
 import api from "../lib/api";
+import useAuth from "../hooks/useAuth";
 
 type DashboardMetrics = {
   vehiculos: number;
@@ -29,6 +31,8 @@ const dateFormatter = new Intl.DateTimeFormat("es-EC", {
 });
 
 const DashboardPage = () => {
+  const { user: authUser } = useAuth();
+  const navigate = useNavigate();
   // Guardamos los totales principales que se muestran en las tarjetas superiores.
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     vehiculos: 0,
@@ -45,22 +49,25 @@ const DashboardPage = () => {
   const [planesList, setPlanesList] = useState<Record<string, unknown>[]>([]);
   const [ordenesList, setOrdenesList] = useState<Record<string, unknown>[]>([]);
   const [alertasList, setAlertasList] = useState<Record<string, unknown>[]>([]);
+  const [tareasList, setTareasList] = useState<Record<string, unknown>[]>([]);
 
   useEffect(() => {
     // Descargamos toda la información relevante del backend al cargar el dashboard.
     const fetchMetrics = async () => {
       setLoading(true);
       try {
-        const [vehiculosRes, planesRes, ordenesRes, alertasRes] = await Promise.all([
+        const [vehiculosRes, planesRes, ordenesRes, tareasRes, alertasRes] = await Promise.all([
           api.get("/vehiculos"),
           api.get("/planes/activos"),
           api.get("/ordenes"),
+          api.get("/tareas"),
           api.get("/alertas/proximas", { params: { dias: 30 } }),
         ]);
 
         const vehiculos = Array.isArray(vehiculosRes.data) ? vehiculosRes.data : [];
         const planes = Array.isArray(planesRes.data) ? planesRes.data : [];
         const ordenes = Array.isArray(ordenesRes.data) ? ordenesRes.data : [];
+        const tareas = Array.isArray(tareasRes.data) ? tareasRes.data : [];
         const alertas = Array.isArray(alertasRes.data) ? alertasRes.data : [];
 
         const ordenesAbiertas = ordenes.filter(
@@ -78,6 +85,7 @@ const DashboardPage = () => {
         setVehiculosList(vehiculos);
         setPlanesList(planes);
         setOrdenesList(ordenes);
+        setTareasList(tareas);
         setAlertasList(alertas);
         setError(null);
       } catch (err) {
@@ -94,6 +102,38 @@ const DashboardPage = () => {
 
     void fetchMetrics();
   }, []);
+
+  // Filtrados relacionados al usuario autenticado: órdenes donde es responsable o tiene tareas asignadas; planes asociados.
+  const relatedOrders = useMemo(() => {
+    if (!authUser) return [] as Record<string, unknown>[];
+    const userId = Number(authUser.usuarioId);
+    // órdenes donde es responsable
+    const ordResponsable = ordenesList.filter((o) => Number(o.responsableId) === userId);
+    // órdenes que contienen tareas asignadas al usuario
+    const ordenesDesdeTareasIds = new Set<number>();
+    tareasList.forEach((t) => {
+      if (Number(t.asignadoAId) === userId && t.ordenId) {
+        ordenesDesdeTareasIds.add(Number(t.ordenId));
+      }
+    });
+    const ordDesdeTareas = ordenesList.filter((o) => ordenesDesdeTareasIds.has(Number(o.id)));
+    const map = new Map<number, Record<string, unknown>>();
+    ordResponsable.concat(ordDesdeTareas).forEach((o) => map.set(Number(o.id), o));
+    return Array.from(map.values());
+  }, [authUser, ordenesList, tareasList]);
+
+  const relatedTasks = useMemo(() => {
+    if (!authUser) return [] as Record<string, unknown>[];
+    const userId = Number(authUser.usuarioId);
+    return tareasList.filter((t) => Number(t.asignadoAId) === userId);
+  }, [authUser, tareasList]);
+
+  const relatedPlans = useMemo(() => {
+    if (!authUser) return [] as Record<string, unknown>[];
+    // planes asociados a los vehículos de las órdenes relacionadas
+    const vehiculoIds = new Set<number>(relatedOrders.map((o) => Number(o.vehiculoId ?? -1)).filter((id) => id > 0));
+    return planesList.filter((p) => vehiculoIds.has(Number(p.vehiculoId)));
+  }, [authUser, planesList, relatedOrders]);
 
   // Calculamos el porcentaje de cumplimiento preventivo a partir de las órdenes cerradas.
   const cumplimientoPreventivo = useMemo(() => {
@@ -124,10 +164,7 @@ const DashboardPage = () => {
       if (!estado) {
         return;
       }
-      if (!(estado in counts)) {
-        counts[estado] = 0;
-      }
-      counts[estado] += 1;
+      counts[estado] = (counts[estado] ?? 0) + 1;
     });
 
     const labels = statusOrder.map((status) => statusLabels[status]);
@@ -165,10 +202,7 @@ const DashboardPage = () => {
       if (!estado) {
         return;
       }
-      if (!(estado in counts)) {
-        counts[estado] = 0;
-      }
-      counts[estado] += 1;
+      counts[estado] = (counts[estado] ?? 0) + 1;
     });
 
     const labels = statusOrder.map((status) => statusLabels[status]);
@@ -349,6 +383,85 @@ const DashboardPage = () => {
       {error ? (
         <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-600">{error}</div>
       ) : null}
+
+      {/* Información: órdenes, planes y tareas asignadas al usuario */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold">Información</h2>
+        <p className="mt-1 text-sm text-slate-500">Resumen de órdenes, planes y tareas asignadas a tu usuario.</p>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          <div>
+            <h3 className="text-sm font-medium">Órdenes</h3>
+            {relatedOrders.length === 0 ? (
+              <div className="text-sm text-slate-500 mt-2">No hay órdenes asignadas o relacionadas.</div>
+            ) : (
+              <ul className="mt-2 space-y-2 text-sm">
+                {relatedOrders.map((o) => (
+                  <li key={String(o.id)} className="flex items-start justify-between">
+                    <div>
+                      <div className="font-medium">{String(o.codigo ?? `Orden #${o.id}`)}</div>
+                      <div className="text-xs text-slate-500">{String(o.vehiculoPlaca ?? "-")} · {String(o.estado ?? "-")}</div>
+                    </div>
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/app/ordenes/${o.id}`)}
+                        className="text-xs text-indigo-600 hover:underline"
+                      >
+                        Ver
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div>
+            <h3 className="text-sm font-medium">Planes</h3>
+            {relatedPlans.length === 0 ? (
+              <div className="text-sm text-slate-500 mt-2">No hay planes relacionados.</div>
+            ) : (
+              <ul className="mt-2 space-y-2 text-sm">
+                {relatedPlans.map((p) => (
+                  <li key={String(p.id)}>
+                    <div className="font-medium">{String(p.nombre ?? `Plan #${p.id}`)}</div>
+                    <div className="text-xs text-slate-500">{String(p.vehiculoPlaca ?? "-")} · Próx: {String(p.proximaFecha ?? "-")}</div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div>
+            <h3 className="text-sm font-medium">Tareas asignadas</h3>
+            {relatedTasks.length === 0 ? (
+              <div className="text-sm text-slate-500 mt-2">No tienes tareas asignadas.</div>
+            ) : (
+              <ul className="mt-2 space-y-2 text-sm">
+                {relatedTasks.map((t) => (
+                  <li key={String(t.id)} className="flex items-start justify-between">
+                    <div>
+                      <div className="font-medium">{String(t.descripcion ?? `Tarea #${t.id}`)}</div>
+                      <div className="text-xs text-slate-500">Orden: {String(t.ordenId ?? "-")}</div>
+                    </div>
+                    <div>
+                      {t.ordenId ? (
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/app/ordenes/${t.ordenId}`)}
+                          className="text-xs text-indigo-600 hover:underline"
+                        >
+                          Ver orden
+                        </button>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </section>
 
       <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard

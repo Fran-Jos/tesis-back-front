@@ -15,6 +15,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRole, string[]> = {
     "/app/tareas",
     "/app/repuestos-usados",
     "/app/registrokm",
+    "/app/alertas",
   ],
   OPERADOR: ["/app/registrokm", "/app/alertas"],
 };

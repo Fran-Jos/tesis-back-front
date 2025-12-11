@@ -4,16 +4,19 @@
  * Se basa completamente en la definición de `config.form.fields`. Cada campo
  * puede tener valores por defecto, opciones remotas y reglas de visibilidad.
  */
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import type { EntityConfig, FieldConfig, Option } from "../../config/entities";
 import api from "../../lib/api";
+import useAuth from "../../hooks/useAuth";
 
 const methodMap = {
   post: api.post.bind(api),
   put: api.put.bind(api),
   patch: api.patch.bind(api),
+  delete: api.delete.bind(api),
 } as const;
 
 type EntityFormPageProps = {
@@ -39,9 +42,8 @@ const resolveErrorMessage = (error: unknown, fallback: string) => {
         return message;
       }
     }
-    if (typeof error.message === "string" && error.message.trim().length > 0) {
-      return error.message;
-    }
+    // If axios error doesn't expose a useful message in response data, fall through
+    // to the generic Error check below.
   }
   if (error instanceof Error && error.message.trim().length > 0) {
     return error.message;
@@ -54,6 +56,19 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
   const params = useParams();
   const recordId = params.id;
   const isEdit = mode === "edit";
+
+  const { user: authUser } = useAuth();
+
+  // Generador de código para órdenes: COD + YYYYMMDD + NNN
+  const generateOrderCode = () => {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const datePart = `${yyyy}${mm}${dd}`;
+    const randomPart = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
+    return `COD${datePart}${randomPart}`;
+  };
 
   // Inicializamos el estado con los valores por defecto definidos en la configuración.
   const [values, setValues] = useState<ValuesState>(() => {
@@ -69,6 +84,20 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
     });
     return initial;
   });
+
+  // Si estamos creando una nueva orden, prellenamos `codigo` con un valor sugerido
+  useEffect(() => {
+    if (mode !== "create") return;
+    if (config.key !== "ordenes") return;
+    setValues((prev) => {
+      // sólo si no hay valor actual
+      if (prev["codigo"] && String(prev["codigo"]).trim() !== "") {
+        return prev;
+      }
+      return { ...prev, codigo: generateOrderCode() };
+    });
+  }, [config.key, mode]);
+
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,13 +124,9 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
   const visibleFields = useMemo(
     () =>
       config.form.fields.filter((field) => {
-        if (isEdit && field.hideOnEdit) {
-          return false;
-        }
-        if (!isEdit && field.hideOnCreate) {
-          return false;
-        }
-        return true;
+        // Si estamos en modo edición ocultamos los campos marcados con `hideOnEdit`.
+        // Si estamos en creación ocultamos los que tienen `hideOnCreate`.
+        return isEdit ? !field.hideOnEdit : !field.hideOnCreate;
       }),
     [config.form.fields, isEdit],
   );
@@ -116,6 +141,28 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
             if (!fetchOptions) {
               return;
             }
+
+            // Caso especial: Registro de kilometraje al crear un nuevo registro
+            // Si el campo es usuarioId y el usuario autenticado es OPERADOR o TECNICO,
+            // mostramos solo su nombre y lo preseleccionamos.
+            if (
+              config.key === "registrokm" &&
+              mode === "create" &&
+              field.name === "usuarioId" &&
+              authUser &&
+              (authUser.rol === "OPERADOR" || authUser.rol === "TECNICO")
+            ) {
+              const option = {
+                value: authUser.usuarioId,
+                label: authUser.nombreCompleto,
+              } as Option;
+              setOptionsState((prev) => ({ ...prev, [field.name]: [option] }));
+              // preseleccionar el usuario autenticado si no hay valor
+              setValues((prev) => ({ ...prev, [field.name]: prev[field.name] ?? authUser.usuarioId }));
+              return;
+            }
+
+            // Comportamiento por defecto: obtener lista completa desde el endpoint
             const response = await api.get(fetchOptions.endpoint);
             const data = Array.isArray(response.data) ? response.data : [];
             const options = data.map((item: Record<string, unknown>) => {
@@ -134,7 +181,7 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
     };
 
     void loadOptions();
-  }, [config.form.fields]);
+  }, [config.form.fields, mode, authUser]);
 
   // Si estamos en modo edición, cargamos el registro existente desde la API.
   useEffect(() => {
@@ -275,6 +322,32 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
 
               if (field.type === "select") {
                 const options = field.options ?? optionsState[field.name] ?? [];
+                const isRegistroKmUserSpecial =
+                  config.key === "registrokm" &&
+                  mode === "create" &&
+                  field.name === "usuarioId" &&
+                  authUser &&
+                  (authUser.rol === "OPERADOR" || authUser.rol === "TECNICO");
+
+                if (isRegistroKmUserSpecial) {
+                  // Mostrar solo el nombre del usuario autenticado como campo de solo lectura
+                  const display = authUser?.nombreCompleto ?? "";
+                  return (
+                    <div key={field.name} className="space-y-2 text-sm">
+                      <label className="font-medium text-slate-700" htmlFor={field.name}>
+                        {field.label}
+                      </label>
+                      <input
+                        id={`${field.name}_display`}
+                        type="text"
+                        value={display}
+                        readOnly
+                        className="w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 bg-slate-100"
+                      />
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={field.name} className="space-y-2 text-sm">
                     <label className="font-medium text-slate-700" htmlFor={field.name}>

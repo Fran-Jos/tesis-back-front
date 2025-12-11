@@ -28,7 +28,7 @@ const decimalFormatter = new Intl.NumberFormat("es-EC", {
 export const formatValue = (value: unknown, type?: FieldType | "enum" | "datetime" | "chip") => {
   if (value === null || value === undefined || value === "") {
     return "-";
-  }
+   }
 
   switch (type) {
     case "number":

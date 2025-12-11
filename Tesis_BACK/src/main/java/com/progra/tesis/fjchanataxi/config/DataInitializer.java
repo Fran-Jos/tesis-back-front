@@ -1,55 +1,35 @@
+// java
 package com.progra.tesis.fjchanataxi.config;
 
 import com.progra.tesis.fjchanataxi.enums.EstadoUsuario;
 import com.progra.tesis.fjchanataxi.enums.Rol;
 import com.progra.tesis.fjchanataxi.model.Usuario;
 import com.progra.tesis.fjchanataxi.repository.UsuarioRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-@RequiredArgsConstructor
 public class DataInitializer {
 
-    private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
-
     @Bean
-    CommandLineRunner initAdminUser() {
+    CommandLineRunner initAdminUser(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            crearUsuarioSiNoExiste(
-                    "admin@tesis.com",
-                    "Administrador",
-                    "Principal",
-                    "0991001000",
-                    Rol.ADMIN,
-                    "Admin1234"
-            );
+            crearUsuarioSiNoExiste(usuarioRepository, passwordEncoder,
+                    "admin@tesis.com", "Administrador", "Principal", "0991001000", Rol.ADMIN, "Admin1234");
 
-            crearUsuarioSiNoExiste(
-                    "operador@tesis.com",
-                    "Olivia",
-                    "Campos",
-                    "0992002000",
-                    Rol.OPERADOR,
-                    "Operador123"
-            );
+            crearUsuarioSiNoExiste(usuarioRepository, passwordEncoder,
+                    "operador@tesis.com", "Olivia", "Campos", "0992002000", Rol.OPERADOR, "Operador123");
 
-            crearUsuarioSiNoExiste(
-                    "tecnico@tesis.com",
-                    "Mateo",
-                    "Reyes",
-                    "0993003000",
-                    Rol.TECNICO,
-                    "Tecnico123"
-            );
+            crearUsuarioSiNoExiste(usuarioRepository, passwordEncoder,
+                    "tecnico@tesis.com", "Mateo", "Reyes", "0993003000", Rol.TECNICO, "Tecnico123");
         };
     }
 
-    private void crearUsuarioSiNoExiste(String email,
+    private void crearUsuarioSiNoExiste(UsuarioRepository usuarioRepository,
+                                        PasswordEncoder passwordEncoder,
+                                        String email,
                                         String nombre,
                                         String apellido,
                                         String celular,

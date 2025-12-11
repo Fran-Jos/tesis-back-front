@@ -488,7 +488,7 @@ export const entityConfigs: EntityConfig[] = [
         {
           field: "tareaNombre",
           label: "Tarea",
-          render: (value, row) => value ?? (row.tareaId ? `Tarea #${row.tareaId as number}` : "Sin asignar"),
+          render: (value: unknown, row: Record<string, unknown>): ReactNode => (value ?? (row.tareaId ? `Tarea #${row.tareaId as number}` : "Sin asignar")) as ReactNode,
         },
         { field: "descripcion", label: "Descripción" },
         { field: "cantidad", label: "Cantidad", type: "decimal" },
@@ -554,7 +554,7 @@ export const entityConfigs: EntityConfig[] = [
         {
           field: "tareaNombre",
           label: "Tarea",
-          render: (value, row) => value ?? (row.tareaId ? `Tarea #${row.tareaId as number}` : "Sin asignar"),
+          render: (value: unknown, row: Record<string, unknown>): ReactNode => (value ?? (row.tareaId ? `Tarea #${row.tareaId as number}` : "Sin asignar")) as ReactNode,
         },
         { field: "descripcion", label: "Descripción" },
         { field: "cantidad", label: "Cantidad", type: "decimal" },
@@ -623,6 +623,7 @@ export const entityConfigs: EntityConfig[] = [
       disableEdit: true,
     },
     actions: {
+      allowView: false,
       allowDelete: false,
       allowEdit: false,
     },
