@@ -6,7 +6,7 @@
  * renderizar la tabla y gestionar acciones CRUD básicas.
  */
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import type { EntityConfig, Option } from "../../config/entities";
 import api from "../../lib/api";
@@ -36,11 +36,12 @@ const EntityListPage = ({ config }: EntityListPageProps) => {
   // Estado para manejar loading/error de la petición principal.
   const [fetchState, setFetchState] = useState<FetchState>({ loading: true, error: null });
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams] = useSearchParams();
   // Cada filtro se inicializa según la configuración para mantener controlados sus valores.
   const [filters, setFilters] = useState<FilterState>(() => {
     const initial: FilterState = {};
     config.list.filters?.forEach((filter) => {
-      initial[filter.name] = "";
+      initial[filter.name] = searchParams.get(filter.name) ?? "";
     });
     return initial;
   });

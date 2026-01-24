@@ -5,7 +5,8 @@
  * del backend (por ejemplo `/vehiculos`). Las páginas de entidades consumen esta
  * estructura para construir dinámicamente tablas, formularios y vistas de detalle.
  */
-import type { ReactNode } from "react";
+import { createElement, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 // definimos los tipos de campos soportados en formularios y tablas
 export type FieldType = "text" | "textarea" | "number" | "decimal" | "select" | "date" | "datetime" | "boolean";
@@ -195,6 +196,24 @@ export const entityConfigs: EntityConfig[] = [
         { field: "anio", label: "Año", type: "number" },
         { field: "estado", label: "Estado", type: "enum" },
         { field: "kmActual", label: "Kilometraje actual", type: "number" },
+        {
+          field: "historial",
+          label: "Histórico",
+          render: (_value: unknown, row: Record<string, unknown>): ReactNode => {
+            const vehiculoId = row.id ? String(row.id) : "";
+            if (!vehiculoId) {
+              return "Sin historial";
+            }
+            return createElement(
+              Link,
+              {
+                to: `/app/historial-vehiculos?vehiculoId=${encodeURIComponent(vehiculoId)}`,
+                className: "text-indigo-600 hover:text-indigo-800",
+              },
+              "Ver historial",
+            );
+          },
+        },
       ],
     },
     form: {
