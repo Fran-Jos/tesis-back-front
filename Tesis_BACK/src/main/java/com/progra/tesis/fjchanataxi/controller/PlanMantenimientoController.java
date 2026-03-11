@@ -20,25 +20,25 @@ public class PlanMantenimientoController {
     private final PlanMantenimientoService planService;
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<PlanDTO> obtener(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(planService.obtener(id));
     }
 
     @GetMapping("/vehiculo/{vehiculoId}")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<List<PlanDTO>> listarPorVehiculo(@PathVariable Long vehiculoId) {
         return ResponseEntity.ok(planService.listarPorVehiculo(vehiculoId));
     }
 
     @GetMapping("/vehiculo/{vehiculoId}/activos")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<List<PlanDTO>> listarActivosPorVehiculo(@PathVariable Long vehiculoId) {
         return ResponseEntity.ok(planService.listarActivosPorVehiculo(vehiculoId));
     }
 
     @GetMapping("/activos")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<List<PlanDTO>> listarActivos() {
         return ResponseEntity.ok(planService.listarActivos());
     }
@@ -77,14 +77,14 @@ public class PlanMantenimientoController {
 
     // http://localhost:8080/API/v1.0/Mantenimiento/planes
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
     public ResponseEntity<PlanDTO> crear(@RequestBody PlanDTO dto) {
         PlanDTO creado = planService.crear(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
     public ResponseEntity<PlanDTO> actualizar(@PathVariable @Min(1) Long id, @RequestBody PlanDTO dto) {
         return ResponseEntity.ok(planService.actualizar(id, dto));
     }

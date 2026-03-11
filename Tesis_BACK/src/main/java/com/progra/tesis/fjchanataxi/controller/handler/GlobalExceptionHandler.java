@@ -20,12 +20,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleNotFound(RecursoNoEncontradoException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
-
     @ExceptionHandler(ReglaNegocioException.class)
     public ResponseEntity<Map<String, Object>> handleBusiness(ReglaNegocioException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, Object> body = new HashMap<>();
@@ -37,17 +35,14 @@ public class GlobalExceptionHandler {
         body.put("errors", errors);
         return ResponseEntity.badRequest().body(body);
     }
-
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConstraint(ConstraintViolationException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
-
     private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message) {
         Map<String, Object> body = new HashMap<>();
         body.put("status", status.value());

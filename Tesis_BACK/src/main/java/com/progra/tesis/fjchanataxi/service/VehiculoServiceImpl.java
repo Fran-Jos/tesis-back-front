@@ -71,7 +71,6 @@ public class VehiculoServiceImpl implements VehiculoService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Vehículo no encontrado"));
 
         List<String> bloqueos = new ArrayList<>();
-
         long planes = planRepository.countByVehiculoId(id);
         if (planes > 0) {
             bloqueos.add(formatoBloqueo(planes,
@@ -79,7 +78,6 @@ public class VehiculoServiceImpl implements VehiculoService {
                     "planes de mantenimiento asociados",
                     "Elimine o reasigne esos planes"));
         }
-
         long ordenesTotales = ordenRepository.countByVehiculoId(id);
         if (ordenesTotales > 0) {
             long ordenesActivas = ordenRepository.countByVehiculoIdAndEstadoIn(id, EnumSet.of(EstadoOrden.ABIERTA, EstadoOrden.EN_PROCESO));
@@ -93,7 +91,6 @@ public class VehiculoServiceImpl implements VehiculoService {
                     ordenesTotales == 1 ? "orden de mantenimiento registrada" : "órdenes de mantenimiento registradas",
                     detalleActivas));
         }
-
         long registros = registroRepository.countByVehiculoId(id);
         if (registros > 0) {
             bloqueos.add(formatoBloqueo(registros,
@@ -101,7 +98,6 @@ public class VehiculoServiceImpl implements VehiculoService {
                     "registros de kilometraje asociados",
                     "Elimine el historial de kilometraje"));
         }
-
         long alertas = alertaRepository.countByVehiculoId(id);
         if (alertas > 0) {
             bloqueos.add(formatoBloqueo(alertas,
@@ -109,14 +105,12 @@ public class VehiculoServiceImpl implements VehiculoService {
                     "alertas pendientes o históricas",
                     "Revise y elimine esas alertas"));
         }
-
         if (!bloqueos.isEmpty()) {
             String detalle = String.join(". ", bloqueos);
             throw new ReglaNegocioException(String.format(
                     "No se puede eliminar el vehículo %s porque %s.",
                     e.getPlaca(), detalle));
         }
-
         vehiculoRepository.delete(e);
     }
 

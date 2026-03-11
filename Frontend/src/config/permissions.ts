@@ -15,9 +15,10 @@ const ROLE_ALLOWED_PATHS: Record<UserRole, string[]> = {
     "/app/tareas",
     "/app/repuestos-usados",
     "/app/registrokm",
+    "/app/historial-vehiculos",
     "/app/alertas",
   ],
-  OPERADOR: ["/app/registrokm", "/app/alertas"],
+  OPERADOR: ["/app/registrokm", "/app/historial-vehiculos", "/app/alertas"],
 };
 
 const normalizePath = (path: string) => {
@@ -47,4 +48,3 @@ export const isPathAllowedForRole = (role: UserRole, pathname: string) => {
   }
   return ROLE_ALLOWED_PATHS[role].some((allowedPath) => matchesAllowedPath(normalized, normalizePath(allowedPath)));
 };
-

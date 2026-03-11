@@ -119,6 +119,7 @@ const entityRoleMap: Record<string, UserRole[]> = {
 const mainNavigation: NavigationLink[] = [
   { name: "Dashboard", to: "/app/dashboard", icon: DashboardIcon, allowedRoles: ["ADMIN", "TECNICO"] },
   { name: "Reportes", to: "/app/reportes/detallado", icon: ChartIcon, allowedRoles: ["ADMIN"] },
+  { name: "Historial de vehículos", to: "/app/historial-vehiculos", icon: DashboardIcon, allowedRoles: ["ADMIN", "TECNICO", "OPERADOR"] },
   ...entityConfigs.map((entity) => ({
     name: entity.label,
     to: `/app/${entity.key}`,

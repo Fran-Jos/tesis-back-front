@@ -21,7 +21,7 @@ public class TareaController {
     private final TareaService tareaService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<List<TareaDTO>> listar(@RequestParam(required = false) String nombre) {
         return ResponseEntity.ok(tareaService.listar(nombre));
     }
@@ -34,7 +34,7 @@ public class TareaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<TareaDTO> obtener(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(tareaService.obtener(id));
     }

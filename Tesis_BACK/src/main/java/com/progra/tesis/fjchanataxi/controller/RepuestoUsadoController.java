@@ -28,7 +28,7 @@ public class RepuestoUsadoController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<List<RepuestoUsadoDTO>> listar(@RequestParam(required = false) Boolean sinTarea) {
         if (Boolean.TRUE.equals(sinTarea)) {
             return ResponseEntity.ok(repuestoService.listarDisponibles());
@@ -37,7 +37,7 @@ public class RepuestoUsadoController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<RepuestoUsadoDTO> obtener(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(repuestoService.obtener(id));
     }

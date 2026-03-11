@@ -19,42 +19,33 @@ import java.util.List;
 @Entity
 @Table(name = "orden_mantenimiento")
 public class OrdenMantenimiento {
-
     @Id
     @SequenceGenerator(name = "ord_seq", sequenceName = "ord_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ord_seq")
     @EqualsAndHashCode.Include
     @Column(name = "ord_id")
     private Long id;
-
     @NotBlank
     @Column(name = "ord_codigo", nullable = false, unique = true)
     private String codigo;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "ord_tipo", nullable = false)
     private TipoOrden tipo;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "ord_estado", nullable = false)
     private EstadoOrden estado;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ord_vehiculo_id", nullable = false)
     private Vehiculo vehiculo;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ord_plan_id")
     private PlanMantenimiento plan;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ord_creado_por_id")
     private Usuario creadoPor;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ord_responsable_id")
     private Usuario responsable;
-
     @Column(name = "ord_fecha_apertura", nullable = false)
     private LocalDateTime fechaApertura;
 

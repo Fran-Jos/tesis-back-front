@@ -30,26 +30,26 @@ public class OrdenMantenimientoController {
     private final OrdenMantenimientoService ordenService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<OrdenDTO> crear(@RequestBody OrdenDTO dto) {
         OrdenDTO creada = ordenService.crear(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(creada);
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<List<OrdenDTO>> listar() {
         return ResponseEntity.ok(ordenService.listar());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<OrdenDTO> obtener(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(ordenService.obtener(id));
     }
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<OrdenDTO> actualizar(@PathVariable @Min(1) Long id, @RequestBody OrdenDTO dto) {
         return ResponseEntity.ok(ordenService.actualizar(id, dto));
     }

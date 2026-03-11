@@ -24,20 +24,20 @@ public class AlertaController {
     private final AlertaService alertaService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO','OPERADOR')")
     public ResponseEntity<AlertaDTO> crearOActualizar(@RequestBody AlertaDTO dto) {
         AlertaDTO guardada = alertaService.upsert(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(guardada);
     }
 
     @PatchMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<AlertaDTO> cambiarEstado(@PathVariable @Min(1) Long id, @RequestBody AlertaDTO dto) {
         return ResponseEntity.ok(alertaService.cambiarEstado(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
     public ResponseEntity<Void> eliminar(@PathVariable @Min(1) Long id) {
         alertaService.eliminar(id);
         return ResponseEntity.noContent().build();
@@ -84,7 +84,6 @@ public class AlertaController {
     public ResponseEntity<List<AlertaDTO>> listarPorClasificacion(@PathVariable ClasificacionAlerta clasificacion) {
         return ResponseEntity.ok(alertaService.listarPorClasificacion(clasificacion));
     }
-
     @GetMapping("/vencidas")
     @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
     public ResponseEntity<List<AlertaDTO>> vencidasHoy() {

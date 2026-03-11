@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-/** Lógica de negocio para Usuarios. */
+
 @Service @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
 
@@ -33,7 +33,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final RegistroKilometrajeRepository registroRepository;
     private final AlertaRepository alertaRepository;
 
-    /** Crea un usuario validando unicidad de email y cédula. */
+    // Crea un usuario validando unicidad de email y cédula.
     @Override
     public UsuarioRespuestaDTO crear(UsuarioDTO dto) {
         if (dto.getEmail() == null || dto.getEmail().isBlank()) {
@@ -74,9 +74,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void eliminar(Long id) {
         Usuario e = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
-
         List<String> bloqueos = new ArrayList<>();
-
         long ordenesCreadas = ordenRepository.countByCreadoPorId(id);
         if (ordenesCreadas > 0) {
             bloqueos.add(formatoBloqueo(ordenesCreadas,
@@ -84,7 +82,6 @@ public class UsuarioServiceImpl implements UsuarioService {
                     "órdenes de mantenimiento creadas por el usuario",
                     "Actualiza esas órdenes para asignar otro creador"));
         }
-
         long ordenesTotalResponsable = ordenRepository.countByResponsableId(id);
         if (ordenesTotalResponsable > 0) {
             long ordenesActivas = ordenRepository.countByResponsableIdAndEstadoIn(id, EnumSet.of(EstadoOrden.ABIERTA, EstadoOrden.EN_PROCESO));
@@ -98,7 +95,6 @@ public class UsuarioServiceImpl implements UsuarioService {
                     ordenesTotalResponsable == 1 ? "orden" : "órdenes",
                     detalleActivas));
         }
-
         long tareasAsignadas = tareaRepository.countByAsignadoAId(id);
         if (tareasAsignadas > 0) {
             bloqueos.add(formatoBloqueo(tareasAsignadas,
@@ -106,7 +102,6 @@ public class UsuarioServiceImpl implements UsuarioService {
                     "tareas asignadas",
                     "Reasigna o elimina esas tareas"));
         }
-
         long registros = registroRepository.countByUsuarioId(id);
         if (registros > 0) {
             bloqueos.add(formatoBloqueo(registros,
@@ -114,7 +109,6 @@ public class UsuarioServiceImpl implements UsuarioService {
                     "registros de kilometraje ingresados",
                     "Elimina o reasigna esos registros"));
         }
-
         long alertasCreadas = alertaRepository.countByCreadaPorId(id);
         if (alertasCreadas > 0) {
             bloqueos.add(formatoBloqueo(alertasCreadas,
@@ -122,14 +116,12 @@ public class UsuarioServiceImpl implements UsuarioService {
                     "alertas registradas",
                     "Actualiza o elimina esas alertas"));
         }
-
         if (!bloqueos.isEmpty()) {
             String detalle = String.join(". ", bloqueos);
             throw new ReglaNegocioException(String.format(
                     "No se puede eliminar al usuario %s %s porque %s.",
                     e.getNombre(), e.getApellido(), detalle));
         }
-
         usuarioRepository.delete(e);
     }
 

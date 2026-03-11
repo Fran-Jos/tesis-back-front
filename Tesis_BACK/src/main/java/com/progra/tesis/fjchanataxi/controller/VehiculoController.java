@@ -38,7 +38,7 @@ public class VehiculoController {
 
     // http://localhost:8080/API/v1.0/Mantenimiento/vehiculos
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<VehiculoDTO> crear(@RequestBody VehiculoDTO dto) {
         VehiculoDTO creado = vehiculoService.crear(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);

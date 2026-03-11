@@ -25,7 +25,7 @@ public class UsuarioController {
 
     // http://localhost:8080/API/v1.0/Mantenimiento/usuarios
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<List<UsuarioRespuestaDTO>> listar() {
         return ResponseEntity.ok(usuarioService.listar());
     }
@@ -38,24 +38,18 @@ public class UsuarioController {
     }
     // http://localhost:8080/API/v1.0/Mantenimiento/usuarios/cedula/1723456789
     @GetMapping("/cedula/{cedula}")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<UsuarioRespuestaDTO> buscarPorCedula(@PathVariable String cedula) {
         return ResponseEntity.ok(usuarioService.buscarPorCedula(cedula));
     }
 
     // http://localhost:8080/API/v1.0/Mantenimiento/usuarios/email/admin@tesis.com
     @GetMapping("/email/{email}")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<UsuarioRespuestaDTO> buscarPorEmail(@PathVariable String email) {
         return ResponseEntity.ok(usuarioService.buscarPorEmail(email));
     }
-
-    /** http://localhost:8080/API/v1.0/Mantenimiento/usuarios
-     *  Ejemplos:
-     *   - /buscar?nombre=Juan
-     *   - /buscar?apellido=Perez
-     *   - /buscar?nombre=Juan&apellido=Perez
-     */
+    // http://localhost:8080/API/v1.0/Mantenimiento/usuarios/buscar?nombre=juan&apellido=chana
     @GetMapping("/buscar")
     @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
     public ResponseEntity<List<UsuarioRespuestaDTO>> buscarPorNombreApellido(
@@ -107,11 +101,6 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    /**
-     // http://localhost:8080/API/v1.0/Mantenimiento/usuarios/1
-     *  Actualiza parcialmente un usuario existente (solo campos enviados).
-     *  Reglas de negocio: valida colisiones de email/cédula en el service.
-     */
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioRespuestaDTO> actualizar(@PathVariable @Min(1) Long id,

@@ -68,9 +68,7 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
     public void eliminar(Long id) {
         PlanMantenimiento p = planRepo.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Plan no encontrado"));
-
         List<String> bloqueos = new ArrayList<>();
-
         long ordenesTotales = ordenRepo.countByPlanId(id);
         if (ordenesTotales > 0) {
             long ordenesActivas = ordenRepo.countByPlanIdAndEstadoIn(id, EnumSet.of(EstadoOrden.ABIERTA, EstadoOrden.EN_PROCESO));
@@ -84,7 +82,6 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
                     ordenesTotales == 1 ? "orden de mantenimiento" : "órdenes de mantenimiento",
                     detalleActivas));
         }
-
         long alertasPendientes = alertaRepo.countByPlanIdAndEstado(id, EstadoAlerta.PENDIENTE);
         if (alertasPendientes > 0) {
             bloqueos.add(String.format("posee %d %s pendientes. Actualice o elimine esas alertas",
@@ -99,14 +96,12 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
                     historicas,
                     historicas == 1 ? "alerta" : "alertas"));
         }
-
         if (!bloqueos.isEmpty()) {
             String detalle = String.join(". ", bloqueos);
             throw new ReglaNegocioException(String.format(
                     "No se puede eliminar el plan %s porque %s.",
                     p.getNombre(), detalle));
         }
-
         planRepo.delete(p);
     }
 

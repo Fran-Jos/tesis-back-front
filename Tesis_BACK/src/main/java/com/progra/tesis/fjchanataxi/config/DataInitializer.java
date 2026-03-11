@@ -20,10 +20,10 @@ public class DataInitializer {
                     "admin@tesis.com", "Administrador", "Principal", "0991001000", Rol.ADMIN, "Admin1234");
 
             crearUsuarioSiNoExiste(usuarioRepository, passwordEncoder,
-                    "operador@tesis.com", "Olivia", "Campos", "0992002000", Rol.OPERADOR, "Operador123");
+                    "operador@tesis.com", "operador", "OP", "0992002000", Rol.OPERADOR, "Operador123");
 
             crearUsuarioSiNoExiste(usuarioRepository, passwordEncoder,
-                    "tecnico@tesis.com", "Mateo", "Reyes", "0993003000", Rol.TECNICO, "Tecnico123");
+                    "tecnico@tesis.com", "Tecnico", "TEC", "0993003000", Rol.TECNICO, "Tecnico123");
         };
     }
 
