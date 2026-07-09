@@ -135,6 +135,7 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
   const [dialogMessage, setDialogMessage] = useState<string | null>(null);
   const [lastVehicleKm, setLastVehicleKm] = useState<number | null>(null);
   const [planKmMessage, setPlanKmMessage] = useState<string | null>(null);
+  const [odometerReferenceMessage, setOdometerReferenceMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!dialogMessage) {
@@ -175,28 +176,6 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
           .map(async (field) => {
             const fetchOptions = field.fetchOptions;
             if (!fetchOptions) {
-              return;
-            }
-
-            // Caso especial: Registro de kilometraje al crear un nuevo registro
-            // Si el campo es usuarioId y el usuario autenticado es OPERADOR o TECNICO,
-            // mostramos solo su nombre y lo preseleccionamos.
-            if (
-              config.key === "registrokm" &&
-              mode === "create" &&
-              field.name === "usuarioId" &&
-              authUser &&
-              (authUser.rol === "OPERADOR" || authUser.rol === "TECNICO")
-            ) {
-              const option = {
-                value: authUser.usuarioId,
-                label: authUser.nombreCompleto,
-              } as Option;
-              if (isMounted) {
-                setOptionsState((prev) => ({ ...prev, [field.name]: [option] }));
-                // preseleccionar el usuario autenticado si no hay valor
-                setValues((prev) => ({ ...prev, [field.name]: prev[field.name] ?? authUser.usuarioId }));
-              }
               return;
             }
 
@@ -325,6 +304,44 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
     };
 
     void loadLastKm();
+    return () => {
+      isMounted = false;
+    };
+  }, [config.key, mode, values.vehiculoId]);
+
+  useEffect(() => {
+    if (config.key !== "registrokm" || mode !== "create") {
+      return;
+    }
+
+    const vehiculoId = values.vehiculoId;
+    if (!vehiculoId) {
+      setOdometerReferenceMessage(null);
+      setValues((prev) => ({ ...prev, odometro: "" }));
+      return;
+    }
+
+    let isMounted = true;
+    const loadLastOdometer = async () => {
+      try {
+        const response = await api.get(`/registrokm/vehiculo/${String(vehiculoId)}/ultimo`);
+        if (!isMounted) return;
+        const odometro = Number((response.data as { odometro?: unknown }).odometro);
+        if (Number.isFinite(odometro)) {
+          setValues((prev) => ({ ...prev, odometro: Math.trunc(odometro) }));
+          setOdometerReferenceMessage(`Último kilometraje registrado: ${odometro.toLocaleString("es-EC")} km`);
+        } else {
+          setValues((prev) => ({ ...prev, odometro: "" }));
+          setOdometerReferenceMessage("Este vehículo no tiene registros de kilometraje previos");
+        }
+      } catch (err) {
+        if (!isMounted) return;
+        setValues((prev) => ({ ...prev, odometro: "" }));
+        setOdometerReferenceMessage("Este vehículo no tiene registros de kilometraje previos");
+      }
+    };
+
+    void loadLastOdometer();
     return () => {
       isMounted = false;
     };
@@ -581,13 +598,6 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
 
               if (field.type === "select") {
                 const options = field.options ?? optionsState[field.name] ?? [];
-                const isRegistroKmUserSpecial =
-                  config.key === "registrokm" &&
-                  mode === "create" &&
-                  field.name === "usuarioId" &&
-                  authUser &&
-                  (authUser.rol === "OPERADOR" || authUser.rol === "TECNICO");
-
                 const isOrdenesCreadoPor = config.key === "ordenes" && field.name === "creadoPorId";
                 const isTareasAsignadoA =
                   config.key === "tareas" &&
@@ -595,12 +605,10 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
                   field.name === "asignadoAId" &&
                   authUser;
 
-                if (isRegistroKmUserSpecial || isOrdenesCreadoPor || isTareasAsignadoA) {
+                if (isOrdenesCreadoPor || isTareasAsignadoA) {
                   // Mostrar solo el nombre del usuario (autenticado al crear, o del registro al editar)
                   let display = "";
-                  if (isRegistroKmUserSpecial) {
-                    display = authUser?.nombreCompleto ?? "";
-                  } else if (isTareasAsignadoA) {
+                  if (isTareasAsignadoA) {
                     display = authUser?.nombreCompleto ?? "";
                   } else if (isOrdenesCreadoPor) {
                     if (mode === "create") {
@@ -769,6 +777,11 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
                   {config.key === "planes" && field.name === "proximoKm" && planKmMessage ? (
                     <p className={`text-xs ${lastVehicleKm === null ? "text-amber-600" : "text-slate-500"}`}>
                       {planKmMessage}
+                    </p>
+                  ) : null}
+                  {config.key === "registrokm" && field.name === "odometro" && odometerReferenceMessage ? (
+                    <p className="text-xs text-slate-500">
+                      {odometerReferenceMessage}
                     </p>
                   ) : null}
                 </div>

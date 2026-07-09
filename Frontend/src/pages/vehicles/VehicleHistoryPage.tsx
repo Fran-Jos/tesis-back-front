@@ -162,13 +162,9 @@ const VehicleHistoryPage = () => {
         // un fallback más conservador para devolver las órdenes del vehículo.
         if (status === 500 && !filters.desde && !filters.hasta) {
           try {
-            const allOrdenesRes = await api.get("/ordenes");
+            const allOrdenesRes = await api.get(`/ordenes/vehiculo/${filters.vehiculoId}`);
             const raw = Array.isArray(allOrdenesRes.data) ? allOrdenesRes.data : [];
-            const filtered = raw.filter((o) => {
-              const vid = String(filters.vehiculoId);
-              return String(o.vehiculoId ?? o.vehiculo?.id ?? o.vehiculoId)?.trim() === vid.trim();
-            });
-            const mapped = filtered.map((o) => ({
+            const mapped = raw.map((o) => ({
               ordenId: o.id ?? o.ordenId ?? 0,
               codigo: o.codigo ?? `Orden #${o.id ?? "-"}`,
               tipo: o.tipo ?? o.tipoOrden ?? "-",
@@ -340,7 +336,7 @@ const VehicleHistoryPage = () => {
                   <tr key={registro.id}>
                     <td className="px-4 py-3 text-slate-700">{formatValue(registro.fecha, "datetime")}</td>
                     <td className="px-4 py-3 text-slate-700">{formatValue(registro.odometro, "number")}</td>
-                    <td className="px-4 py-3 text-slate-700">{registro.usuarioNombre ?? "-"}</td>
+                    <td className="px-4 py-3 text-slate-700">{registro.usuarioNombre || "No registrado"}</td>
                   </tr>
                 ))}
               </tbody>

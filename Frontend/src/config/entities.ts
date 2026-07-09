@@ -626,7 +626,11 @@ export const entityConfigs: EntityConfig[] = [
         { field: "vehiculoPlaca", label: "Vehículo" },
         { field: "fecha", label: "Fecha", type: "datetime" },
         { field: "odometro", label: "Odómetro", type: "number" },
-        { field: "usuarioNombre", label: "Registrado por" },
+        {
+          field: "usuarioNombre",
+          label: "Registrado por",
+          render: (value: unknown): ReactNode => value ? String(value) : "No registrado",
+        },
       ],
       filters: [
         {
@@ -659,17 +663,6 @@ export const entityConfigs: EntityConfig[] = [
             transformLabel: (vehiculo) => `${vehiculo.placa as string} · ${vehiculo.marca as string}`,
           },
         },
-        {
-          name: "usuarioId",
-          label: "Usuario",
-          type: "select",
-          fetchOptions: {
-            endpoint: "/usuarios",
-            valueKey: "id",
-            labelKey: "nombre",
-            transformLabel: (usuario) => `${usuario.nombre as string} ${usuario.apellido as string}`,
-          },
-        },
         { name: "fecha", label: "Fecha", type: "datetime" },
         { name: "odometro", label: "Odómetro", type: "number", required: true },
       ],
@@ -685,7 +678,11 @@ export const entityConfigs: EntityConfig[] = [
         { field: "vehiculoPlaca", label: "Vehículo" },
         { field: "fecha", label: "Fecha", type: "datetime" },
         { field: "odometro", label: "Odómetro", type: "number" },
-        { field: "usuarioNombre", label: "Registrado por" },
+        {
+          field: "usuarioNombre",
+          label: "Registrado por",
+          render: (value: unknown): ReactNode => value ? String(value) : "No registrado",
+        },
       ],
     },
   },

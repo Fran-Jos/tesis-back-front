@@ -31,7 +31,7 @@ public class VehiculoController {
 
     // http://localhost:8080/API/v1.0/Mantenimiento/vehiculos/{id}
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
     public ResponseEntity<VehiculoDTO> obtenerPorID(@PathVariable("id") @Min(1) Long id) {
         return ResponseEntity.ok(vehiculoService.obtener(id));
     }

@@ -12,11 +12,13 @@ import com.progra.tesis.fjchanataxi.model.Vehiculo;
 import com.progra.tesis.fjchanataxi.repository.AlertaRepository;
 import com.progra.tesis.fjchanataxi.repository.PlanMantenimientoRepository;
 import com.progra.tesis.fjchanataxi.repository.RegistroKilometrajeRepository;
-import com.progra.tesis.fjchanataxi.repository.UsuarioRepository;
 import com.progra.tesis.fjchanataxi.repository.VehiculoRepository;
+import com.progra.tesis.fjchanataxi.security.UserPrincipal;
 import com.progra.tesis.fjchanataxi.service.exception.ReglaNegocioException;
 import com.progra.tesis.fjchanataxi.service.exception.RecursoNoEncontradoException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,7 +34,6 @@ public class RegistroKilometrajeServiceImpl implements RegistroKilometrajeServic
 
     private final RegistroKilometrajeRepository regRepo;
     private final VehiculoRepository vehiculoRepo;
-    private final UsuarioRepository usuarioRepo;
     private final PlanMantenimientoRepository planRepo;
     private final AlertaRepository alertaRepo;
 
@@ -51,10 +52,7 @@ public class RegistroKilometrajeServiceImpl implements RegistroKilometrajeServic
 
         Vehiculo vehiculo = vehiculoRepo.findById(dto.getVehiculoId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Vehículo no existe"));
-        Usuario usuario = (dto.getUsuarioId() != null)
-                ? usuarioRepo.findById(dto.getUsuarioId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no existe"))
-                : null;
+        Usuario usuario = obtenerUsuarioAutenticado();
 
         // Validación clave: el nuevo odómetro debe ser > al último valor conocido
         long ultimoKm = obtenerUltimoKmReferencia(vehiculo.getId(), vehiculo.getKmActual());
@@ -177,10 +175,28 @@ public class RegistroKilometrajeServiceImpl implements RegistroKilometrajeServic
                 .vehiculoId(e.getVehiculo().getId())
                 .vehiculoPlaca(e.getVehiculo().getPlaca())
                 .usuarioId(e.getUsuario() != null ? e.getUsuario().getId() : null)
-                .usuarioNombre(e.getUsuario() != null ? e.getUsuario().getNombre() + " " + e.getUsuario().getApellido() : null)
+                .usuarioNombre(nombreCompleto(e.getUsuario()))
                 .fecha(e.getFecha())
                 .odometro(e.getOdometro())
                 .build();
+    }
+
+    private Usuario obtenerUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal principal)) {
+            throw new ReglaNegocioException("No se pudo identificar el usuario autenticado");
+        }
+        return principal.getUsuario();
+    }
+
+    private String nombreCompleto(Usuario usuario) {
+        if (usuario == null) {
+            return null;
+        }
+        String nombre = usuario.getNombre() != null ? usuario.getNombre().trim() : "";
+        String apellido = usuario.getApellido() != null ? usuario.getApellido().trim() : "";
+        String completo = (nombre + " " + apellido).trim();
+        return completo.isEmpty() ? null : completo;
     }
 
     /**
