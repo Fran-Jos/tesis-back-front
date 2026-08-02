@@ -68,6 +68,10 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
   const isEdit = mode === "edit";
   const preselectedOrdenId = config.key === "tareas" && mode === "create" ? searchParams.get("ordenId") : null;
   const preselectedTareaId = config.key === "repuestos-usados" && mode === "create" ? searchParams.get("tareaId") : null;
+  const preselectedAlertVehicle = config.key === "ordenes" && mode === "create" ? searchParams.get("vehiculoId") : null;
+  const preselectedAlertPlan = config.key === "ordenes" && mode === "create" ? searchParams.get("planId") : null;
+  const preselectedAlertType = config.key === "ordenes" && mode === "create" ? searchParams.get("tipo") : null;
+  const preselectedAlertaId = config.key === "ordenes" && mode === "create" ? searchParams.get("alertaId") : null;
 
   const { user: authUser } = useAuth();
   const { refreshAlerts } = useAlerts();
@@ -112,9 +116,12 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
       if (authUser && (!prev["creadoPorId"] || prev["creadoPorId"] === "")) {
         next.creadoPorId = authUser.usuarioId;
       }
+      if (preselectedAlertVehicle) next.vehiculoId = preselectedAlertVehicle;
+      if (preselectedAlertPlan) next.planId = preselectedAlertPlan;
+      if (preselectedAlertType) next.tipo = preselectedAlertType;
       return next;
     });
-  }, [config.key, mode, authUser]);
+  }, [config.key, mode, authUser, preselectedAlertVehicle, preselectedAlertPlan, preselectedAlertType]);
 
   useEffect(() => {
     if (!preselectedOrdenId) return;
@@ -459,6 +466,16 @@ const EntityFormPage = ({ config, mode }: EntityFormPageProps) => {
       const endpoint = isEdit && method !== "post" ? `${config.apiPath}/${recordId}` : config.apiPath;
       const request = methodMap[method];
       const response = await request(endpoint, payload);
+
+      if (config.key === "ordenes" && mode === "create" && preselectedAlertaId) {
+        const ordenId = (response.data as { id?: number }).id;
+        if (ordenId) {
+          await api.patch(`/alertas/${preselectedAlertaId}`, {
+            estado: "PENDIENTE",
+            ordenAtendidaId: ordenId,
+          });
+        }
+      }
 
       // --- Lógica Inteligente de Alertas ---
       

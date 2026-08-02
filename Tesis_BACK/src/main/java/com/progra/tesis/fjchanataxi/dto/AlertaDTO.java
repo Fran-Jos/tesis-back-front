@@ -3,6 +3,7 @@ package com.progra.tesis.fjchanataxi.dto;
 import com.progra.tesis.fjchanataxi.enums.ClasificacionAlerta;
 import com.progra.tesis.fjchanataxi.enums.EstadoAlerta;
 import com.progra.tesis.fjchanataxi.enums.TipoAlerta;
+import com.progra.tesis.fjchanataxi.enums.SeveridadAlerta;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -30,6 +31,8 @@ public class AlertaDTO {
 
     /** Clasificación técnica: PROXIMA o VENCIDA (para preventivas). */
     private ClasificacionAlerta clasificacion;
+    private SeveridadAlerta severidad;
+    private Integer odometroObjetivo;
 
     /** Mensaje descriptivo de la alerta. */
     private String mensaje;
@@ -42,6 +45,8 @@ public class AlertaDTO {
 
     /** Usuario que creó la alerta (opcional si la genera el sistema). */
     private Long creadaPorId;
+    private Long asignadaAId;
+    private String asignadaANombre;
 
     /** Orden que atendió la alerta (se completa al cerrar la OM). */
     private Long ordenAtendidaId;

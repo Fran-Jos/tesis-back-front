@@ -126,6 +126,7 @@ const mainNavigation: NavigationLink[] = [
     icon: entityIconMap[entity.key] ?? DashboardIcon,
     allowedRoles: entityRoleMap[entity.key] ?? ["ADMIN"],
   })),
+  { name: "Ajustes", to: "/app/ajustes", icon: GearIcon, allowedRoles: ["ADMIN"] },
 ];
 
 // Exportamos la estructura final que consume `AppShell` para renderizar enlaces.

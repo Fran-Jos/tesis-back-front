@@ -61,7 +61,7 @@ const DashboardPage = () => {
           api.get("/planes/activos"),
           api.get("/ordenes"),
           api.get("/tareas"),
-          api.get("/alertas/proximas", { params: { dias: 30 } }),
+          api.get("/alertas/mis-alertas"),
         ]);
 
         const vehiculos = Array.isArray(vehiculosRes.data) ? vehiculosRes.data : [];

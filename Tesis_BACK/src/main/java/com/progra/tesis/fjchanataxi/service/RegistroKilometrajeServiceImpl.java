@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,12 +37,14 @@ public class RegistroKilometrajeServiceImpl implements RegistroKilometrajeServic
     private final VehiculoRepository vehiculoRepo;
     private final PlanMantenimientoRepository planRepo;
     private final AlertaRepository alertaRepo;
+    private final MotorAlertasService motorAlertasService;
 
     /**
      * Inserta un registro de km, valida que el odómetro sea estrictamente mayor al último valor,
      * actualiza km del vehículo y genera/actualiza alertas por KM.
      */
     @Override
+    @Transactional
     public RegistroKilometrajeDTO crear(RegistroKilometrajeDTO dto) {
         if (dto.getVehiculoId() == null) {
             throw new ReglaNegocioException("El vehículo es obligatorio");
@@ -75,17 +78,7 @@ public class RegistroKilometrajeServiceImpl implements RegistroKilometrajeServic
         vehiculoRepo.save(vehiculo);
 
         // Reglas de alertas por KM (próxima / vencida contra proximoKm del plan)
-        List<PlanMantenimiento> planes = planRepo.findByVehiculoIdAndActivoTrue(vehiculo.getId());
-        for (PlanMantenimiento plan : planes) {
-            if (!Boolean.TRUE.equals(plan.getActivo())) continue;
-            if (plan.getProximoKm() == null) continue;
-            int faltan = plan.getProximoKm() - dto.getOdometro().intValue();
-            if (faltan <= 0) {
-                upsertAlertaKm(vehiculo, plan, ClasificacionAlerta.VENCIDA);
-            } else if (faltan <= UMBRAL_PROXIMA_KM) {
-                upsertAlertaKm(vehiculo, plan, ClasificacionAlerta.PROXIMA);
-            }
-        }
+        motorAlertasService.evaluarVehiculo(vehiculo.getId());
 
         return toDTO(reg);
     }

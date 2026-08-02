@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import com.progra.tesis.fjchanataxi.repository.UsuarioRepository;
+import com.progra.tesis.fjchanataxi.enums.EstadoUsuario;
 
 @RestController
 @RequestMapping(value = "/alertas", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -22,6 +25,24 @@ import java.util.List;
 public class AlertaController {
 
     private final AlertaService alertaService;
+    private final UsuarioRepository usuarioRepository;
+
+    @GetMapping("/mis-alertas")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    public ResponseEntity<List<AlertaDTO>> misAlertas() {
+        return ResponseEntity.ok(alertaService.listarParaUsuarioActual());
+    }
+
+    @GetMapping("/destinatarios")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','TECNICO')")
+    public ResponseEntity<List<Map<String, Object>>> destinatarios() {
+        return ResponseEntity.ok(usuarioRepository.findByEstado(EstadoUsuario.ACTIVO).stream()
+                .map(u -> Map.<String, Object>of(
+                        "id", u.getId(),
+                        "nombreCompleto", u.getNombre() + " " + u.getApellido(),
+                        "rol", u.getRol().name()))
+                .toList());
+    }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN','TECNICO','OPERADOR')")

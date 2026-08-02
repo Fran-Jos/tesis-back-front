@@ -16,6 +16,7 @@ public interface AlertaService {
     void eliminar(Long id);                                      // Elimina alerta
     AlertaDTO obtener(Long id);                         // Detalle
     List<AlertaDTO> listarPendientesPorVehiculo(Long vehiculoId);
+    List<AlertaDTO> listarParaUsuarioActual();
 
     // Búsquedas
     List<AlertaDTO> listarPorVehiculo(Long vehiculoId);

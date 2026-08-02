@@ -13,6 +13,10 @@ export type AlertaDTO = {
   estado: "PENDIENTE" | "ATENDIDA" | "CANCELADA";
   planId?: number;
   planNombre?: string;
+  tipo?: "KILOMETRAJE" | "FECHA" | "CORRECTIVO";
+  ordenAtendidaId?: number;
+  asignadaAId?: number;
+  asignadaANombre?: string;
 };
 
 type AlertsContextType = {
@@ -30,16 +34,9 @@ export const AlertsProvider = ({ children }: { children: ReactNode }) => {
   const refreshAlerts = useCallback(async () => {
     setLoading(true);
     try {
-      // Obtenemos las alertas de interés para las notificaciones
-      const [vencidasRes, proximasRes] = await Promise.all([
-        api.get<AlertaDTO[]>("/alertas/vencidas"),
-        api.get<AlertaDTO[]>("/alertas/proximas", { params: { dias: 30 } }),
-      ]);
-
-      const merged = [
-        ...(Array.isArray(vencidasRes.data) ? vencidasRes.data : []),
-        ...(Array.isArray(proximasRes.data) ? proximasRes.data : []),
-      ];
+      // El backend aplica el alcance: ADMIN recibe todas; otros roles solo las asignadas.
+      const response = await api.get<AlertaDTO[]>("/alertas/mis-alertas");
+      const merged = Array.isArray(response.data) ? response.data : [];
 
       // Eliminar duplicados por ID (por si una alerta aparece en ambos endpoints por algún motivo)
       const uniqueMap = new Map<number, AlertaDTO>();

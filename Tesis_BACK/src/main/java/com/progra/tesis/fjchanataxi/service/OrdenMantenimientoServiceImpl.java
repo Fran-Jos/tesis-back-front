@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
 @Service @RequiredArgsConstructor
 public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService {
 
-    private static final BigDecimal IVA_DEFAULT = new BigDecimal("12.00");
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final Locale LOCALE_ES_EC = new Locale("es", "EC");
 
@@ -51,6 +50,8 @@ public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService 
     private final RepuestoUsadoRepository repuestoRepo;
     private final AlertaRepository alertaRepo;
     private final RegistroKilometrajeRepository registroKmRepo;
+    private final ConfiguracionSistemaService configuracionSistemaService;
+    private final MotorAlertasService motorAlertasService;
 
     /** Crea una OM y opcionalmente añade tareas. Recalcula totales. */
     @Override
@@ -91,7 +92,8 @@ public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService 
         om.setTotalManoObra(BigDecimal.ZERO);
         om.setTotalRepuestos(BigDecimal.ZERO);
         om.setSubtotal(BigDecimal.ZERO);
-        om.setIvaPorc(dto.getIvaPorc() != null ? dto.getIvaPorc() : IVA_DEFAULT);
+        // Política administrativa: el formulario operativo no puede sobrescribir el IVA.
+        om.setIvaPorc(configuracionSistemaService.obtenerEntidad().getIvaPredeterminado());
         om.setIvaValor(BigDecimal.ZERO);
         om.setTotal(BigDecimal.ZERO);
         om = ordenRepo.save(om);
@@ -204,16 +206,13 @@ public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService 
             om.setDetalle(normalizarTexto(dto.getDetalle()));
         }
 
-        if (dto.getIvaPorc() != null) {
-            om.setIvaPorc(dto.getIvaPorc());
-        }
 
         recalcularTotales(om);
         OrdenMantenimiento actualizado = ordenRepo.save(om);
         if (cerrarDesdeActualizacion && actualizado.getTipo() == TipoOrden.PREVENTIVA && actualizado.getPlan() != null) {
             actualizarPlanDespuesDeOrden(actualizado);
             atenderAlertasDelPlan(actualizado);
-            crearAlertaSiguienteCiclo(actualizado.getPlan());
+            motorAlertasService.evaluarPlan(actualizado.getPlan().getId());
         }
         return entityToDTO(actualizado);
     }
@@ -273,7 +272,7 @@ public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService 
         if (om.getTipo() == TipoOrden.PREVENTIVA && om.getPlan() != null) {
             actualizarPlanDespuesDeOrden(om);
             atenderAlertasDelPlan(om);
-            crearAlertaSiguienteCiclo(om.getPlan());
+            motorAlertasService.evaluarPlan(om.getPlan().getId());
         }
         return entityToDTO(om);
     }
@@ -824,7 +823,7 @@ public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService 
         BigDecimal subtotal = manoObra.add(repuestos);
 
         BigDecimal ivaPorc = (om.getIvaPorc() == null || om.getIvaPorc().compareTo(BigDecimal.ZERO) == 0)
-                ? IVA_DEFAULT : om.getIvaPorc();
+                ? configuracionSistemaService.obtenerEntidad().getIvaPredeterminado() : om.getIvaPorc();
         BigDecimal ivaValor = subtotal.multiply(ivaPorc).divide(new BigDecimal("100"));
 
         om.setTotalManoObra(manoObra);
@@ -862,6 +861,9 @@ public class OrdenMantenimientoServiceImpl implements OrdenMantenimientoService 
         alerta.setPlan(plan);
         alerta.setTipo(plan.getProximaFecha().isBefore(LocalDate.now()) ? TipoAlerta.CORRECTIVO : TipoAlerta.FECHA);
         alerta.setClasificacion(plan.getProximaFecha().isBefore(LocalDate.now()) ? ClasificacionAlerta.VENCIDA : ClasificacionAlerta.PROXIMA);
+        alerta.setSeveridad(plan.getProximaFecha().isBefore(LocalDate.now())
+                ? com.progra.tesis.fjchanataxi.enums.SeveridadAlerta.ROJO
+                : com.progra.tesis.fjchanataxi.enums.SeveridadAlerta.NARANJA);
         alerta.setMensaje("Plan " + plan.getNombre() + " programado para el " + plan.getProximaFecha() + ".");
         alerta.setFechaProgramada(plan.getProximaFecha());
         alerta.setEstado(EstadoAlerta.PENDIENTE);

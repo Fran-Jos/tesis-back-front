@@ -3,12 +3,16 @@ package com.progra.tesis.fjchanataxi.service;
 import com.progra.tesis.fjchanataxi.dto.AlertaDTO;
 
 import com.progra.tesis.fjchanataxi.enums.EstadoAlerta;
+import com.progra.tesis.fjchanataxi.enums.SeveridadAlerta;
+import com.progra.tesis.fjchanataxi.enums.Rol;
+import com.progra.tesis.fjchanataxi.security.UserPrincipal;
 import com.progra.tesis.fjchanataxi.model.*;
 import com.progra.tesis.fjchanataxi.repository.*;
 import com.progra.tesis.fjchanataxi.service.exception.ReglaNegocioException;
 import com.progra.tesis.fjchanataxi.service.exception.RecursoNoEncontradoException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,6 +25,7 @@ public class AlertaServiceImpl implements AlertaService {
     private final VehiculoRepository vehiculoRepo;
     private final PlanMantenimientoRepository planRepo;
     private final OrdenMantenimientoRepository ordenRepo;
+    private final UsuarioRepository usuarioRepo;
 
     /** Crea/actualiza manualmente una alerta. */
     @Override
@@ -40,9 +45,23 @@ public class AlertaServiceImpl implements AlertaService {
             throw new ReglaNegocioException("No se puede crear una alerta pendiente para un plan inactivo");
         }
         a.setPlan(p);
+        Usuario actual = usuarioActual();
+        if (a.getId() == null) {
+            a.setCreadaPor(actual);
+        }
+        if (actual.getRol() == Rol.ADMIN && dto.getAsignadaAId() != null) {
+            a.setAsignadaA(usuarioRepo.findById(dto.getAsignadaAId())
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Usuario asignado no existe")));
+        } else if (actual.getRol() != Rol.ADMIN) {
+            a.setAsignadaA(actual);
+        }
 
         a.setTipo(dto.getTipo());
         a.setClasificacion(dto.getClasificacion());
+        a.setSeveridad(dto.getSeveridad() != null ? dto.getSeveridad()
+                : dto.getClasificacion() == com.progra.tesis.fjchanataxi.enums.ClasificacionAlerta.VENCIDA
+                ? SeveridadAlerta.ROJO : SeveridadAlerta.NARANJA);
+        a.setOdometroObjetivo(dto.getOdometroObjetivo());
         a.setMensaje(dto.getMensaje());
         a.setFechaProgramada(dto.getFechaProgramada());
         a.setEstado(dto.getEstado());
@@ -93,6 +112,15 @@ public class AlertaServiceImpl implements AlertaService {
     public List<AlertaDTO> listarPendientesPorVehiculo(Long vehiculoId) {
         return alertaRepo.findByVehiculoIdAndEstadoOrderByFechaProgramadaAsc(vehiculoId, EstadoAlerta.PENDIENTE)
                 .stream().filter(this::alertaActivaPermitida).map(this::entityToDTO).toList();
+    }
+
+    @Override
+    public List<AlertaDTO> listarParaUsuarioActual() {
+        Usuario usuario = usuarioActual();
+        List<Alerta> alertas = usuario.getRol() == Rol.ADMIN
+                ? alertaRepo.findByEstadoOrderByFechaProgramadaAsc(EstadoAlerta.PENDIENTE)
+                : alertaRepo.findByAsignadaAIdAndEstadoOrderByFechaProgramadaAsc(usuario.getId(), EstadoAlerta.PENDIENTE);
+        return alertas.stream().filter(this::alertaActivaPermitida).map(this::entityToDTO).toList();
     }
 
     // ---- Búsquedas ----
@@ -173,14 +201,30 @@ public class AlertaServiceImpl implements AlertaService {
                 .planNombre(a.getPlan() != null ? a.getPlan().getNombre() : null)
                 .tipo(a.getTipo())
                 .clasificacion(a.getClasificacion())
+                .severidad(a.getSeveridad() == null
+                        ? (a.getClasificacion() == com.progra.tesis.fjchanataxi.enums.ClasificacionAlerta.VENCIDA
+                        ? SeveridadAlerta.ROJO : SeveridadAlerta.NARANJA)
+                        : a.getSeveridad())
+                .odometroObjetivo(a.getOdometroObjetivo())
                 .mensaje(a.getMensaje())
                 .fechaProgramada(a.getFechaProgramada())
                 .estado(a.getEstado())
                 .ordenAtendidaId(a.getOrdenAtendida() != null ? a.getOrdenAtendida().getId() : null)
+                .asignadaAId(a.getAsignadaA() != null ? a.getAsignadaA().getId() : null)
+                .asignadaANombre(a.getAsignadaA() != null
+                        ? a.getAsignadaA().getNombre() + " " + a.getAsignadaA().getApellido() : null)
                 .build();
     }
 
     private boolean alertaActivaPermitida(Alerta alerta) {
         return alerta.getPlan() == null || Boolean.TRUE.equals(alerta.getPlan().getActivo());
+    }
+
+    private Usuario usuarioActual() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal principal)) {
+            throw new ReglaNegocioException("No se pudo identificar al usuario autenticado");
+        }
+        return principal.getUsuario();
     }
 }

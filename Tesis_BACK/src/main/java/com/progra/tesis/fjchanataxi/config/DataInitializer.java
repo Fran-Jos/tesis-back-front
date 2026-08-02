@@ -37,6 +37,7 @@ public class DataInitializer {
                                         String passwordPlano) {
         if (usuarioRepository.existsByEmail(email)) {
             return;
+            
         }
 
         Usuario usuario = Usuario.builder()

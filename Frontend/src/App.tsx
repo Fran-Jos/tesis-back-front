@@ -22,6 +22,7 @@ import EntityFormPage from "./pages/entities/EntityFormPage";
 import EntityDetailPage from "./pages/entities/EntityDetailPage";
 import MantenimientoDetalladoReportPage from "./pages/reports/MantenimientoDetalladoReportPage";
 import VehicleHistoryPage from "./pages/vehicles/VehicleHistoryPage";
+import SettingsPage from "./pages/settings/SettingsPage";
 
 // Definimos el componente de aplicación que envuelve toda la jerarquía visual.
 const App = () => {
@@ -90,6 +91,7 @@ const App = () => {
               </Route>
               {/** Módulo de historial de vehículos con filtros y detalle ampliado. */}
               <Route path="historial-vehiculos" element={<VehicleHistoryPage />} />
+              <Route path="ajustes" element={<SettingsPage />} />
               {/** Cuando se visita /app sin subruta se redirige según el rol del usuario. */}
               <Route index element={<AppIndexRedirect />} />
             </Route>

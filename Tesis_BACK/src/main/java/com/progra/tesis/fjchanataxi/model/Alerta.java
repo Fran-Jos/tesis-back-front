@@ -3,6 +3,7 @@ package com.progra.tesis.fjchanataxi.model;
 import com.progra.tesis.fjchanataxi.enums.ClasificacionAlerta;
 import com.progra.tesis.fjchanataxi.enums.EstadoAlerta;
 import com.progra.tesis.fjchanataxi.enums.TipoAlerta;
+import com.progra.tesis.fjchanataxi.enums.SeveridadAlerta;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +34,11 @@ public class Alerta {
     @Enumerated(EnumType.STRING)
     @Column(name = "ale_clasificacion", nullable = false)
     private ClasificacionAlerta clasificacion; // PROXIMA o VENCIDA
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ale_severidad")
+    private SeveridadAlerta severidad;
+    @Column(name = "ale_odometro_objetivo")
+    private Integer odometroObjetivo;
     @Column(name = "ale_mensaje", nullable = false, length = 200)
     private String mensaje;
     @Column(name = "ale_fecha_programada", nullable = false)
@@ -43,6 +49,9 @@ public class Alerta {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ale_creada_por_id")
     private Usuario creadaPor;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ale_asignada_a_id")
+    private Usuario asignadaA;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ale_orden_atendida_id")

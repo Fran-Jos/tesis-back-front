@@ -15,6 +15,8 @@ import Topbar from "./Topbar"; // Barra superior reutilizable con acciones de us
 import useAuth from "../../hooks/useAuth"; // Hook que expone identidad y logout.
 import { entityConfigMap } from "../../config/entities"; // Mapa para traducir la URL a metadatos descriptivos.
 import useAlertsMonitor from "../../hooks/useAlertsMonitor";
+import CriticalAlertsModal from "../alerts/CriticalAlertsModal";
+import BrowserNotifications from "../alerts/BrowserNotifications";
 
 const AppShell = () => {
   // Ejecuta el monitor de alertas en segundo plano
@@ -53,6 +55,10 @@ const AppShell = () => {
       return { title: "Reportes", subtitle: "Visualiza la información histórica del mantenimiento" };
     }
 
+    if (segments[1] === "ajustes") {
+      return { title: "Ajustes del sistema", subtitle: "Motor preventivo, comunicaciones y operación" };
+    }
+
     // Garantizamos que entityKey sea un string (no undefined) antes de indexar el mapa.
     const entityKey = segments[1] ?? "";
     const entityConfig = entityConfigMap[entityKey];
@@ -73,6 +79,8 @@ const AppShell = () => {
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-700">
+      <CriticalAlertsModal />
+      <BrowserNotifications />
       <aside
         className={clsx(
           "fixed inset-y-0 left-0 z-40 w-72 border-r border-slate-200 bg-white/95 px-4 py-6 shadow-lg backdrop-blur-lg transition-transform duration-300 lg:static lg:translate-x-0",

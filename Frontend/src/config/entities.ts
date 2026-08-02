@@ -436,7 +436,6 @@ export const entityConfigs: EntityConfig[] = [
             transformLabel: (usuario) => `${usuario.nombre as string} ${usuario.apellido as string}`,
           },
         },
-        { name: "ivaPorc", label: "IVA (%)", type: "decimal" },
       ],
     },
     detail: {
@@ -714,6 +713,7 @@ export const entityConfigs: EntityConfig[] = [
           },
         },
         { field: "estado", label: "Estado", type: "enum" },
+        { field: "asignadaANombre", label: "Asignada a" },
         { field: "fechaProgramada", label: "Fecha objetivo", type: "date" },
       ],
       filters: [
@@ -735,15 +735,7 @@ export const entityConfigs: EntityConfig[] = [
           options: enumOptions.estadoAlerta,
         },
       ],
-      endpoint: (filters) => {
-        if (filters && filters.vehiculoId) {
-          return `/alertas/vehiculo/${filters.vehiculoId as string}`;
-        }
-        if (filters && filters.estado) {
-          return `/alertas/estado/${filters.estado as string}`;
-        }
-        return "/alertas/proximas?dias=30";
-      },
+      endpoint: () => "/alertas/mis-alertas",
     },
     form: {
       fields: [
@@ -776,6 +768,17 @@ export const entityConfigs: EntityConfig[] = [
         { name: "mensaje", label: "Mensaje", type: "textarea", required: true },
         { name: "fechaProgramada", label: "Fecha programada", type: "date" },
         { name: "odometroObjetivo", label: "Kilometraje objetivo", type: "number" },
+        {
+          name: "asignadaAId",
+          label: "Asignar alerta a",
+          type: "select",
+          fetchOptions: {
+            endpoint: "/alertas/destinatarios",
+            valueKey: "id",
+            labelKey: "nombreCompleto",
+            transformLabel: (usuario) => `${usuario.nombreCompleto as string} · ${usuario.rol as string}`,
+          },
+        },
         { name: "estado", label: "Estado", type: "select", options: enumOptions.estadoAlerta },
       ],
       updateMethod: "post",
@@ -784,6 +787,7 @@ export const entityConfigs: EntityConfig[] = [
       fields: [
         { field: "vehiculoPlaca", label: "Vehículo" },
         { field: "planNombre", label: "Plan" },
+        { field: "asignadaANombre", label: "Asignada a" },
         { field: "tipo", label: "Tipo", type: "enum" },
         { field: "clasificacion", label: "Clasificación", type: "enum" },
         {

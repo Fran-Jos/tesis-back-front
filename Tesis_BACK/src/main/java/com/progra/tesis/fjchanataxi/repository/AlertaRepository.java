@@ -35,6 +35,7 @@ public interface AlertaRepository extends JpaRepository<Alerta, Long> {
     List<Alerta> findByPlanIdAndEstado(Long planId, EstadoAlerta estado);
 
     List<Alerta> findByEstadoOrderByFechaProgramadaAsc(EstadoAlerta estado);
+    List<Alerta> findByAsignadaAIdAndEstadoOrderByFechaProgramadaAsc(Long usuarioId, EstadoAlerta estado);
 
     List<Alerta> findByTipoOrderByFechaProgramadaAsc(TipoAlerta tipo);
 

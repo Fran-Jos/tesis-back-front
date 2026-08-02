@@ -30,13 +30,13 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class TareaServiceImpl implements TareaService {
 
-    private static final BigDecimal IVA_DEFAULT = new BigDecimal("12.00");
     private static final Locale LOCALE_ES_EC = new Locale("es", "EC");
 
     private final TareaRepository tareaRepository;
     private final OrdenMantenimientoRepository ordenRepository;
     private final UsuarioRepository usuarioRepository;
     private final RepuestoUsadoRepository repuestoRepository;
+    private final ConfiguracionSistemaService configuracionSistemaService;
 
     @Override
     public TareaDTO crear(Long ordenId, TareaDTO dto) {
@@ -312,7 +312,7 @@ public class TareaServiceImpl implements TareaService {
         BigDecimal subtotal = manoObra.add(repuestos);
 
         BigDecimal ivaPorc = (orden.getIvaPorc() == null || orden.getIvaPorc().compareTo(BigDecimal.ZERO) == 0)
-                ? IVA_DEFAULT : orden.getIvaPorc();
+                ? configuracionSistemaService.obtenerEntidad().getIvaPredeterminado() : orden.getIvaPorc();
         BigDecimal ivaValor = subtotal.multiply(ivaPorc).divide(new BigDecimal("100"));
 
         orden.setTotalManoObra(manoObra);

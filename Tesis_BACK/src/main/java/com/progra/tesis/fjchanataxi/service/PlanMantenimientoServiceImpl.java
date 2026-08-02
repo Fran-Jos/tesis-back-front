@@ -36,6 +36,7 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
     private final AlertaRepository alertaRepo;
     private final OrdenMantenimientoRepository ordenRepo;
     private final RegistroKilometrajeRepository registroKmRepo;
+    private final MotorAlertasService motorAlertasService;
 
     /** Crea un plan para un vehículo. */
     @Override
@@ -49,7 +50,7 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
         PlanMantenimiento p = dtoToEntity(dto, new PlanMantenimiento(), v);
         calcularProximosSiCorresponde(p, dto);
         PlanMantenimiento guardado = planRepo.save(p);
-        sincronizarAlertasPlan(guardado);
+        motorAlertasService.evaluarPlan(guardado.getId());
         return entityToDTO(guardado);
     }
 
@@ -66,7 +67,7 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
         p = dtoToEntity(dto, p, v);
         calcularProximosSiCorresponde(p, dto);
         PlanMantenimiento actualizado = planRepo.save(p);
-        sincronizarAlertasPlan(actualizado);
+        motorAlertasService.evaluarPlan(actualizado.getId());
         return entityToDTO(actualizado);
     }
 
@@ -122,7 +123,6 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
     @Override
     public List<PlanDTO> listar() {
         return planRepo.findAll().stream()
-                .peek(this::sincronizarAlertasPlan)
                 .map(this::entityToDTO)
                 .toList();
     }
@@ -131,7 +131,6 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
     @Override
     public List<PlanDTO> listarActivosPorVehiculo(Long vehiculoId) {
         return planRepo.findByVehiculoIdAndActivoTrue(vehiculoId).stream()
-                .peek(this::sincronizarAlertasPlan)
                 .map(this::entityToDTO)
                 .toList();
     }
@@ -140,7 +139,6 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
     @Override
     public List<PlanDTO> listarPorVehiculo(Long vehiculoId) {
         return planRepo.findByVehiculoId(vehiculoId).stream()
-                .peek(this::sincronizarAlertasPlan)
                 .map(this::entityToDTO)
                 .toList();
     }
@@ -148,7 +146,6 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
     @Override
     public List<PlanDTO> listarActivos() {
         return planRepo.findByActivoTrue().stream()
-                .peek(this::sincronizarAlertasPlan)
                 .map(this::entityToDTO)
                 .toList();
     }
@@ -165,7 +162,6 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Vehículo no existe"));
         long km = v.getKmActual() == null ? 0 : v.getKmActual();
         return planRepo.findByVehiculoIdAndActivoTrue(vehiculoId).stream()
-                .peek(this::sincronizarAlertasPlan)
                 .filter(p -> p.getProximoKm() != null)
                 .filter(p -> {
                     int faltan = p.getProximoKm() - (int) km;
@@ -180,7 +176,6 @@ public class PlanMantenimientoServiceImpl implements PlanMantenimientoService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Vehículo no existe"));
         long km = v.getKmActual() == null ? 0 : v.getKmActual();
         return planRepo.findByVehiculoIdAndActivoTrue(vehiculoId).stream()
-                .peek(this::sincronizarAlertasPlan)
                 .filter(p -> p.getProximoKm() != null && p.getProximoKm() <= km)
                 .map(this::entityToDTO).toList();
     }
